@@ -1,0 +1,622 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BC0F9E9A2CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9E992CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift */; };
+		BC0F9E9C2CE486CB0016DD1C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9E9B2CE486CB0016DD1C /* ContentView.swift */; };
+		BC0F9E9E2CE486CD0016DD1C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC0F9E9D2CE486CD0016DD1C /* Assets.xcassets */; };
+		BC0F9EA22CE486CD0016DD1C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC0F9EA12CE486CD0016DD1C /* Preview Assets.xcassets */; };
+		BC0F9EAC2CE486CD0016DD1C /* SeniorConnectApp_IOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EAB2CE486CD0016DD1C /* SeniorConnectApp_IOSTests.swift */; };
+		BC0F9EB62CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EB52CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift */; };
+		BC0F9EB82CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EB72CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BC0F9EA82CE486CD0016DD1C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BC0F9E8E2CE486CB0016DD1C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BC0F9E952CE486CB0016DD1C;
+			remoteInfo = "SeniorConnectApp-IOS";
+		};
+		BC0F9EB22CE486CD0016DD1C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BC0F9E8E2CE486CB0016DD1C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BC0F9E952CE486CB0016DD1C;
+			remoteInfo = "SeniorConnectApp-IOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		BC0F9E962CE486CB0016DD1C /* SeniorConnectApp-IOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SeniorConnectApp-IOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC0F9E992CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeniorConnectApp_IOSApp.swift; sourceTree = "<group>"; };
+		BC0F9E9B2CE486CB0016DD1C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		BC0F9E9D2CE486CD0016DD1C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BC0F9E9F2CE486CD0016DD1C /* SeniorConnectApp_IOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SeniorConnectApp_IOS.entitlements; sourceTree = "<group>"; };
+		BC0F9EA12CE486CD0016DD1C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		BC0F9EA72CE486CD0016DD1C /* SeniorConnectApp-IOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SeniorConnectApp-IOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC0F9EAB2CE486CD0016DD1C /* SeniorConnectApp_IOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeniorConnectApp_IOSTests.swift; sourceTree = "<group>"; };
+		BC0F9EB12CE486CD0016DD1C /* SeniorConnectApp-IOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SeniorConnectApp-IOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC0F9EB52CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeniorConnectApp_IOSUITests.swift; sourceTree = "<group>"; };
+		BC0F9EB72CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeniorConnectApp_IOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BC0F9E932CE486CB0016DD1C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC0F9EA42CE486CD0016DD1C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC0F9EAE2CE486CD0016DD1C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BC0F9E8D2CE486CB0016DD1C = {
+			isa = PBXGroup;
+			children = (
+				BC0F9E982CE486CB0016DD1C /* SeniorConnectApp-IOS */,
+				BC0F9EAA2CE486CD0016DD1C /* SeniorConnectApp-IOSTests */,
+				BC0F9EB42CE486CD0016DD1C /* SeniorConnectApp-IOSUITests */,
+				BC0F9E972CE486CB0016DD1C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BC0F9E972CE486CB0016DD1C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BC0F9E962CE486CB0016DD1C /* SeniorConnectApp-IOS.app */,
+				BC0F9EA72CE486CD0016DD1C /* SeniorConnectApp-IOSTests.xctest */,
+				BC0F9EB12CE486CD0016DD1C /* SeniorConnectApp-IOSUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BC0F9E982CE486CB0016DD1C /* SeniorConnectApp-IOS */ = {
+			isa = PBXGroup;
+			children = (
+				BC0F9E992CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift */,
+				BC0F9E9B2CE486CB0016DD1C /* ContentView.swift */,
+				BC0F9E9D2CE486CD0016DD1C /* Assets.xcassets */,
+				BC0F9E9F2CE486CD0016DD1C /* SeniorConnectApp_IOS.entitlements */,
+				BC0F9EA02CE486CD0016DD1C /* Preview Content */,
+			);
+			path = "SeniorConnectApp-IOS";
+			sourceTree = "<group>";
+		};
+		BC0F9EA02CE486CD0016DD1C /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				BC0F9EA12CE486CD0016DD1C /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		BC0F9EAA2CE486CD0016DD1C /* SeniorConnectApp-IOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				BC0F9EAB2CE486CD0016DD1C /* SeniorConnectApp_IOSTests.swift */,
+			);
+			path = "SeniorConnectApp-IOSTests";
+			sourceTree = "<group>";
+		};
+		BC0F9EB42CE486CD0016DD1C /* SeniorConnectApp-IOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BC0F9EB52CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift */,
+				BC0F9EB72CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift */,
+			);
+			path = "SeniorConnectApp-IOSUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BC0F9E952CE486CB0016DD1C /* SeniorConnectApp-IOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BC0F9EBB2CE486CD0016DD1C /* Build configuration list for PBXNativeTarget "SeniorConnectApp-IOS" */;
+			buildPhases = (
+				BC0F9E922CE486CB0016DD1C /* Sources */,
+				BC0F9E932CE486CB0016DD1C /* Frameworks */,
+				BC0F9E942CE486CB0016DD1C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "SeniorConnectApp-IOS";
+			productName = "SeniorConnectApp-IOS";
+			productReference = BC0F9E962CE486CB0016DD1C /* SeniorConnectApp-IOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BC0F9EA62CE486CD0016DD1C /* SeniorConnectApp-IOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BC0F9EBE2CE486CD0016DD1C /* Build configuration list for PBXNativeTarget "SeniorConnectApp-IOSTests" */;
+			buildPhases = (
+				BC0F9EA32CE486CD0016DD1C /* Sources */,
+				BC0F9EA42CE486CD0016DD1C /* Frameworks */,
+				BC0F9EA52CE486CD0016DD1C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BC0F9EA92CE486CD0016DD1C /* PBXTargetDependency */,
+			);
+			name = "SeniorConnectApp-IOSTests";
+			productName = "SeniorConnectApp-IOSTests";
+			productReference = BC0F9EA72CE486CD0016DD1C /* SeniorConnectApp-IOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BC0F9EB02CE486CD0016DD1C /* SeniorConnectApp-IOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BC0F9EC12CE486CD0016DD1C /* Build configuration list for PBXNativeTarget "SeniorConnectApp-IOSUITests" */;
+			buildPhases = (
+				BC0F9EAD2CE486CD0016DD1C /* Sources */,
+				BC0F9EAE2CE486CD0016DD1C /* Frameworks */,
+				BC0F9EAF2CE486CD0016DD1C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BC0F9EB32CE486CD0016DD1C /* PBXTargetDependency */,
+			);
+			name = "SeniorConnectApp-IOSUITests";
+			productName = "SeniorConnectApp-IOSUITests";
+			productReference = BC0F9EB12CE486CD0016DD1C /* SeniorConnectApp-IOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BC0F9E8E2CE486CB0016DD1C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					BC0F9E952CE486CB0016DD1C = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					BC0F9EA62CE486CD0016DD1C = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = BC0F9E952CE486CB0016DD1C;
+					};
+					BC0F9EB02CE486CD0016DD1C = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = BC0F9E952CE486CB0016DD1C;
+					};
+				};
+			};
+			buildConfigurationList = BC0F9E912CE486CB0016DD1C /* Build configuration list for PBXProject "SeniorConnectApp-IOS" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BC0F9E8D2CE486CB0016DD1C;
+			productRefGroup = BC0F9E972CE486CB0016DD1C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BC0F9E952CE486CB0016DD1C /* SeniorConnectApp-IOS */,
+				BC0F9EA62CE486CD0016DD1C /* SeniorConnectApp-IOSTests */,
+				BC0F9EB02CE486CD0016DD1C /* SeniorConnectApp-IOSUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BC0F9E942CE486CB0016DD1C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC0F9EA22CE486CD0016DD1C /* Preview Assets.xcassets in Resources */,
+				BC0F9E9E2CE486CD0016DD1C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC0F9EA52CE486CD0016DD1C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC0F9EAF2CE486CD0016DD1C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BC0F9E922CE486CB0016DD1C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC0F9E9C2CE486CB0016DD1C /* ContentView.swift in Sources */,
+				BC0F9E9A2CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC0F9EA32CE486CD0016DD1C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC0F9EAC2CE486CD0016DD1C /* SeniorConnectApp_IOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC0F9EAD2CE486CD0016DD1C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC0F9EB62CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift in Sources */,
+				BC0F9EB82CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BC0F9EA92CE486CD0016DD1C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BC0F9E952CE486CB0016DD1C /* SeniorConnectApp-IOS */;
+			targetProxy = BC0F9EA82CE486CD0016DD1C /* PBXContainerItemProxy */;
+		};
+		BC0F9EB32CE486CD0016DD1C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BC0F9E952CE486CB0016DD1C /* SeniorConnectApp-IOS */;
+			targetProxy = BC0F9EB22CE486CD0016DD1C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BC0F9EB92CE486CD0016DD1C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BC0F9EBA2CE486CD0016DD1C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		BC0F9EBC2CE486CD0016DD1C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SeniorConnectApp-IOS/SeniorConnectApp_IOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SeniorConnectApp-IOS/Preview Content\"";
+				DEVELOPMENT_TEAM = K8Z8U59P8C;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hk.edu.hkbu.comp.SeniorConnectApp-IOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BC0F9EBD2CE486CD0016DD1C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SeniorConnectApp-IOS/SeniorConnectApp_IOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SeniorConnectApp-IOS/Preview Content\"";
+				DEVELOPMENT_TEAM = K8Z8U59P8C;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hk.edu.hkbu.comp.SeniorConnectApp-IOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BC0F9EBF2CE486CD0016DD1C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K8Z8U59P8C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hk.edu.hkbu.comp.SeniorConnectApp-IOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SeniorConnectApp-IOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SeniorConnectApp-IOS";
+			};
+			name = Debug;
+		};
+		BC0F9EC02CE486CD0016DD1C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K8Z8U59P8C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hk.edu.hkbu.comp.SeniorConnectApp-IOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SeniorConnectApp-IOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SeniorConnectApp-IOS";
+			};
+			name = Release;
+		};
+		BC0F9EC22CE486CD0016DD1C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K8Z8U59P8C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hk.edu.hkbu.comp.SeniorConnectApp-IOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "SeniorConnectApp-IOS";
+			};
+			name = Debug;
+		};
+		BC0F9EC32CE486CD0016DD1C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K8Z8U59P8C;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hk.edu.hkbu.comp.SeniorConnectApp-IOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "SeniorConnectApp-IOS";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BC0F9E912CE486CB0016DD1C /* Build configuration list for PBXProject "SeniorConnectApp-IOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC0F9EB92CE486CD0016DD1C /* Debug */,
+				BC0F9EBA2CE486CD0016DD1C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BC0F9EBB2CE486CD0016DD1C /* Build configuration list for PBXNativeTarget "SeniorConnectApp-IOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC0F9EBC2CE486CD0016DD1C /* Debug */,
+				BC0F9EBD2CE486CD0016DD1C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BC0F9EBE2CE486CD0016DD1C /* Build configuration list for PBXNativeTarget "SeniorConnectApp-IOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC0F9EBF2CE486CD0016DD1C /* Debug */,
+				BC0F9EC02CE486CD0016DD1C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BC0F9EC12CE486CD0016DD1C /* Build configuration list for PBXNativeTarget "SeniorConnectApp-IOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC0F9EC22CE486CD0016DD1C /* Debug */,
+				BC0F9EC32CE486CD0016DD1C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BC0F9E8E2CE486CB0016DD1C /* Project object */;
+}
