@@ -210,40 +210,280 @@ struct EventRow: View {
 }
 
 // MARK: - Tutorial Models
+// MARK: - Models for Lessons and Tutorials
+struct Lesson: Identifiable, Codable {
+    let id: String
+    let title: String
+    let description: String
+    let videoURL: String?
+    let steps: [LessonStep]
+    var isCompleted: Bool
+    var savedForLater: Bool
+    var needsMentorHelp: Bool
+}
+
+struct LessonStep: Identifiable, Codable {
+    let id: String
+    let title: String
+    let description: String
+    let actionItems: [ActionItem]
+    var isCompleted: Bool
+}
+
+struct ActionItem: Identifiable, Codable {
+    let id: String
+    let task: String
+    var isCompleted: Bool
+    var needsHelp: Bool
+}
+
+// Update TutorialCategory
 struct TutorialCategory: Identifiable {
     let id = UUID()
     let name: String
     let description: String
     let icon: String
     let color: Color
+    let lessons: [Lesson]?
     
     static let allCategories = [
         TutorialCategory(
             name: "Smartphone Basics",
             description: "Learn essential smartphone operations",
             icon: "iphone",
-            color: .blue
+            color: .blue,
+            lessons: [
+                Lesson(
+                    id: "intro",
+                    title: "Introduction to Android",
+                    description: "Learn how to navigate through Android basics",
+                    videoURL: "video_url_1",
+                    steps: [
+                        LessonStep(
+                            id: "step1",
+                            title: "Getting Started",
+                            description: "Basic navigation and controls",
+                            actionItems: [
+                                ActionItem(id: "1", task: "Locate and test the power button", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "2", task: "Practice volume controls", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "3", task: "Try different sound modes", isCompleted: false, needsHelp: false)
+                            ],
+                            isCompleted: false
+                        )
+                    ],
+                    isCompleted: false,
+                    savedForLater: false,
+                    needsMentorHelp: false
+                ),
+                Lesson(
+                    id: "setup",
+                    title: "Phone Setup & Controls",
+                    description: "Master phone settings and basic controls",
+                    videoURL: "video_url_2",
+                    steps: [
+                        LessonStep(
+                            id: "step1",
+                            title: "Basic Controls",
+                            description: "Learn about essential phone controls",
+                            actionItems: [
+                                ActionItem(id: "1", task: "Practice using power button", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "2", task: "Adjust volume settings", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "3", task: "Use notification panel", isCompleted: false, needsHelp: false)
+                            ],
+                            isCompleted: false
+                        ),
+                        LessonStep(
+                            id: "step2",
+                            title: "Phone Settings",
+                            description: "Configure basic phone settings",
+                            actionItems: [
+                                ActionItem(id: "1", task: "Adjust display brightness", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "2", task: "Set up sound profiles", isCompleted: false, needsHelp: false)
+                            ],
+                            isCompleted: false
+                        )
+                    ],
+                    isCompleted: false,
+                    savedForLater: false,
+                    needsMentorHelp: false
+                ),
+                Lesson(
+                    id: "homescreen",
+                    title: "Home Screen Customization",
+                    description: "Learn to personalize your home screen",
+                    videoURL: "video_url_3",
+                    steps: [
+                        LessonStep(
+                            id: "step1",
+                            title: "App Management",
+                            description: "Learn to organize your apps",
+                            actionItems: [
+                                ActionItem(id: "1", task: "Add apps to home screen", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "2", task: "Create app folders", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "3", task: "Arrange apps and folders", isCompleted: false, needsHelp: false)
+                            ],
+                            isCompleted: false
+                        ),
+                        LessonStep(
+                            id: "step2",
+                            title: "Widgets",
+                            description: "Add and customize widgets",
+                            actionItems: [
+                                ActionItem(id: "1", task: "Add a calendar widget", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "2", task: "Add weather widget", isCompleted: false, needsHelp: false),
+                                ActionItem(id: "3", task: "Resize widgets", isCompleted: false, needsHelp: false)
+                            ],
+                            isCompleted: false
+                        )
+                    ],
+                    isCompleted: false,
+                    savedForLater: false,
+                    needsMentorHelp: false
+                ),
+                Lesson(
+                            id: "sharing",
+                            title: "Sharing Content",
+                            description: "Learn how to share content with others through various apps",
+                            videoURL: "video_url_4",
+                            steps: [
+                                LessonStep(
+                                    id: "share1",
+                                    title: "Share Pictures",
+                                    description: "Learn how to share photos from your gallery",
+                                    actionItems: [
+                                        ActionItem(id: "s1", task: "Open Gallery and select a photo", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "s2", task: "Tap the share button (arrow icon)", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "s3", task: "Practice sending a photo via message", isCompleted: false, needsHelp: false)
+                                    ],
+                                    isCompleted: false
+                                ),
+                                LessonStep(
+                                    id: "share2",
+                                    title: "Share from Apps",
+                                    description: "Share content from different applications",
+                                    actionItems: [
+                                        ActionItem(id: "s4", task: "Share a YouTube video link", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "s5", task: "Use the paperclip in messages to share content", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "s6", task: "Pin frequently used sharing options", isCompleted: false, needsHelp: false)
+                                    ],
+                                    isCompleted: false
+                                ),
+                                LessonStep(
+                                    id: "share3",
+                                    title: "Advanced Sharing",
+                                    description: "Learn additional sharing features",
+                                    actionItems: [
+                                        ActionItem(id: "s7", task: "Share to multiple apps at once", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "s8", task: "Copy links for sharing later", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "s9", task: "Customize your quick share options", isCompleted: false, needsHelp: false)
+                                    ],
+                                    isCompleted: false
+                                )
+                            ],
+                            isCompleted: false,
+                            savedForLater: false,
+                            needsMentorHelp: false
+                        ),
+                        
+                        Lesson(
+                            id: "keyboard",
+                            title: "Keyboard Mastery",
+                            description: "Master the Android keyboard features and settings",
+                            videoURL: "video_url_5",
+                            steps: [
+                                LessonStep(
+                                    id: "key1",
+                                    title: "Basic Keyboard Controls",
+                                    description: "Learn fundamental keyboard operations",
+                                    actionItems: [
+                                        ActionItem(id: "k1", task: "Practice showing/hiding keyboard", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k2", task: "Switch between letter and number modes", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k3", task: "Use shift key for capitalization", isCompleted: false, needsHelp: false)
+                                    ],
+                                    isCompleted: false
+                                ),
+                                LessonStep(
+                                    id: "key2",
+                                    title: "Special Features",
+                                    description: "Explore advanced keyboard features",
+                                    actionItems: [
+                                        ActionItem(id: "k4", task: "Try voice-to-text input", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k5", task: "Use emoji keyboard", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k6", task: "Practice one-handed keyboard mode", isCompleted: false, needsHelp: false)
+                                    ],
+                                    isCompleted: false
+                                ),
+                                LessonStep(
+                                    id: "key3",
+                                    title: "Keyboard Settings",
+                                    description: "Customize your keyboard experience",
+                                    actionItems: [
+                                        ActionItem(id: "k7", task: "Adjust keyboard size", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k8", task: "Configure autocorrect settings", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k9", task: "Set up keyboard shortcuts", isCompleted: false, needsHelp: false)
+                                    ],
+                                    isCompleted: false
+                                ),
+                                LessonStep(
+                                    id: "key4",
+                                    title: "Text Editing",
+                                    description: "Master text editing features",
+                                    actionItems: [
+                                        ActionItem(id: "k10", task: "Practice copy and paste", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k11", task: "Use text selection tools", isCompleted: false, needsHelp: false),
+                                        ActionItem(id: "k12", task: "Try clipboard features", isCompleted: false, needsHelp: false)
+                                    ],
+                                    isCompleted: false
+                                )
+                            ],
+                            isCompleted: false,
+                            savedForLater: false,
+                            needsMentorHelp: false
+                        )
+            ]
         ),
         TutorialCategory(
             name: "Internet Safety",
             description: "Stay safe while browsing online",
             icon: "lock.shield",
-            color: .green
+            color: .green,
+            lessons: nil
         ),
         TutorialCategory(
             name: "Social Media",
             description: "Connect with friends and family",
             icon: "person.2",
-            color: .purple
+            color: .purple,
+            lessons: nil
         ),
         TutorialCategory(
             name: "Smart Home",
             description: "Control your smart home devices",
             icon: "homekit",
-            color: .orange
+            color: .orange,
+            lessons: nil
         )
     ]
 }
+
+// MARK: - ViewModel for managing tutorial state
+class TutorialViewModel: ObservableObject {
+    @Published var selectedLesson: Lesson?
+    @Published var currentStep: Int = 0
+    
+    func updateLessonProgress(_ lesson: Lesson) {
+        // Update lesson progress in your data store
+    }
+    
+    func requestMentorHelp(for lesson: Lesson) {
+        // Handle mentor help request
+    }
+    
+    func saveForLater(_ lesson: Lesson) {
+        // Save lesson for later
+    }
+}
+
 
 // MARK: - Tutorial Detail View
 struct TutorialDetailView: View {
@@ -269,16 +509,25 @@ struct TutorialDetailView: View {
                 }
                 .padding()
                 
-                // Tutorial Steps
-                ForEach(getTutorialSteps(), id: \.title) { step in
-                    TutorialStepCard(
-                        step: step,
-                        isActive: currentStep == step.order,
-                        isCompleted: currentStep > step.order
-                    )
-                    .onTapGesture {
-                        withAnimation {
-                            currentStep = step.order
+                if let lessons = category.lessons {
+                    // Show lessons
+                    ForEach(lessons, id: \.id) { lesson in
+                        NavigationLink(destination: LessonDetailView(lesson: .constant(lesson))) {
+                            LessonRowView(lesson: lesson)
+                        }
+                    }
+                } else {
+                    // Show default tutorial steps
+                    ForEach(getTutorialSteps(), id: \.title) { step in
+                        TutorialStepCard(
+                            step: step,
+                            isActive: currentStep == step.order,
+                            isCompleted: currentStep > step.order
+                        )
+                        .onTapGesture {
+                            withAnimation {
+                                currentStep = step.order
+                            }
                         }
                     }
                 }
@@ -289,7 +538,7 @@ struct TutorialDetailView: View {
     }
     
     private func getTutorialSteps() -> [TutorialStep] {
-        // Return appropriate steps based on category
+        // Your existing getTutorialSteps implementation
         switch category.name {
         case "Smartphone Basics":
             return [
@@ -522,5 +771,167 @@ struct EventPreviewRow: View {
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 8)
+    }
+}
+
+struct LessonRowView: View {
+    let lesson: Lesson
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(lesson.title)
+                        .font(.headline)
+                    Text(lesson.description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                if lesson.isCompleted {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                }
+            }
+            
+            if lesson.needsMentorHelp {
+                Label("Help Requested", systemImage: "person.fill.questionmark")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(10)
+        .shadow(radius: 1)
+    }
+}
+
+struct VideoPlayerView: View {
+    let videoURL: String
+    
+    var body: some View {
+        VStack {
+            // Placeholder for video player
+            Text("Video Player")
+                .frame(height: 200)
+                .frame(maxWidth: .infinity)
+                .background(Color.gray.opacity(0.2))
+            
+            Text("Video URL: \(videoURL)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+    }
+}
+
+struct LessonDetailView: View {
+    @Binding var lesson: Lesson
+    @StateObject private var viewModel = TutorialViewModel()
+    @State private var showingVideo = false
+    @State private var showingMentorRequest = false
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Video Section
+                if let videoURL = lesson.videoURL {
+                    Button {
+                        showingVideo = true
+                    } label: {
+                        ZStack {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 200)
+                            
+                            Image(systemName: "play.circle.fill")
+                                .font(.system(size: 50))
+                                .foregroundColor(.blue)
+                        }
+                        .cornerRadius(12)
+                    }
+                }
+                
+                // Lesson Content
+                ForEach(lesson.steps.indices, id: \.self) { index in
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(lesson.steps[index].title)
+                            .font(.headline)
+                        
+                        Text(lesson.steps[index].description)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        // Action Items
+                        ForEach(lesson.steps[index].actionItems) { item in
+                            HStack {
+                                Button {
+                                    // Toggle completion
+                                } label: {
+                                    Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(item.isCompleted ? .green : .gray)
+                                }
+                                
+                                Text(item.task)
+                                    .strikethrough(item.isCompleted)
+                                
+                                Spacer()
+                                
+                                if !item.isCompleted {
+                                    Button {
+                                        showingMentorRequest = true
+                                    } label: {
+                                        Image(systemName: "questionmark.circle")
+                                            .foregroundColor(.orange)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    .padding()
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                    .shadow(radius: 2)
+                }
+                
+                // Action Buttons
+                HStack {
+                    Button {
+                        lesson.savedForLater.toggle()
+                    } label: {
+                        Label(
+                            lesson.savedForLater ? "Saved" : "Save for Later",
+                            systemImage: lesson.savedForLater ? "bookmark.fill" : "bookmark"
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        showingMentorRequest = true
+                    } label: {
+                        Label("Request Help", systemImage: "person.fill.questionmark")
+                    }
+                }
+                .padding()
+            }
+            .padding()
+        }
+        .navigationTitle(lesson.title)
+        .sheet(isPresented: $showingVideo) {
+            VideoPlayerView(videoURL: lesson.videoURL ?? "")
+        }
+        .alert("Request Mentor Help", isPresented: $showingMentorRequest) {
+            Button("Cancel", role: .cancel) { }
+            Button("Request Help") {
+                lesson.needsMentorHelp = true
+            }
+        } message: {
+            Text("Would you like to request help from a mentor for this lesson?")
+        }
     }
 }

@@ -14,3 +14,11 @@ How can we teach Digiotal Literacy to Elderly? (Brainstorming)
 * Integrate IoT functionalities to enhance user experience, such as smart home device controls
 and health monitoring tools. Provide interactive tutorials on how to use common IoT devices, tailored for seniors.
 
+https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1dnTw&index=2
+
+
+13 Nov 
+- [ ] Smartphone Basics Frontend
+- [ ] Smartphone Basics Backend
+
+
