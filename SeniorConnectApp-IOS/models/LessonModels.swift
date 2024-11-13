@@ -20,8 +20,25 @@ struct LessonProgress: Codable {
 }
 
 struct ProgressResponse: Codable {
-    let progress: LessonProgress
+    let progress: Progress
     let overallProgress: OverallProgress
+    
+    struct Progress: Codable {
+        let lessonId: String
+        let completed: Bool
+        let lastAccessed: Date
+        let completedSteps: [String]
+        let completedActionItems: [String]
+        let quizScores: [QuizScore]
+        let savedForLater: Bool
+        let needsMentorHelp: Bool
+        let mentorNotes: String?
+    }
+    
+    struct QuizScore: Codable {
+        let score: Int
+        let attemptDate: Date
+    }
 }
 
 struct OverallProgress: Codable {
@@ -178,3 +195,11 @@ struct QuickAction: Identifiable {
     let icon: String
     let color: Color
 }
+
+struct BatchProgress: Codable {
+    let category: String
+    let lessonId: String
+    let completedSteps: [String]
+    let completedItems: [String]
+}
+

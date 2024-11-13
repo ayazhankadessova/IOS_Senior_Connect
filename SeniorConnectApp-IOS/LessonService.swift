@@ -43,4 +43,5 @@ class LessonService: ObservableObject {
         // Update local state if needed
         print("Progress updated: \(updatedProgress)")
     }
+    
 }

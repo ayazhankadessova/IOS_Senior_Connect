@@ -87,6 +87,7 @@ struct TutorialDetailView: View {
     @StateObject private var lessonService = LessonService()
     @State private var showError = false
     @State private var errorMessage = ""
+    @EnvironmentObject var authService: AuthService
     
     var body: some View {
         ScrollView {
@@ -115,9 +116,9 @@ struct TutorialDetailView: View {
                     ForEach(lessonService.lessons) { lesson in
                         NavigationLink {
                             LessonDetailView(
-                                lesson: .constant(lesson),
-                                userId: "" // Pass user ID here
-                            )
+                                                            lesson: lesson,
+                                                            userId: authService.currentUser?.id ?? ""
+                                                        )
                         } label: {
                             LessonRowView(lesson: lesson)
                                 .padding(.horizontal)
@@ -190,19 +191,22 @@ struct VideoPlayerView: View {
 }
 
 struct LessonDetailView: View {
-    @Binding var lesson: Lesson
+    @State var lesson: Lesson
     let userId: String
     @StateObject private var viewModel: TutorialViewModel
     @State private var showingVideo = false
     @State private var showingMentorRequest = false
     @State private var mentorNotes = ""
     @State private var showingSaveConfirmation = false
+    @State private var completedSteps: Set<String> = []
+    @State private var completedItems: Set<String> = []
+    @State private var hasUnsavedChanges = false
     
-    init(lesson: Binding<Lesson>, userId: String) {
-        self._lesson = lesson
-        self.userId = userId
-        self._viewModel = StateObject(wrappedValue: TutorialViewModel(userId: userId))
-    }
+    init(lesson: Lesson, userId: String) {
+            self._lesson = State(initialValue: lesson)
+            self.userId = userId
+            self._viewModel = StateObject(wrappedValue: TutorialViewModel(userId: userId))
+        }
     
     var body: some View {
         ScrollView {
@@ -232,15 +236,51 @@ struct LessonDetailView: View {
                 
                 // Steps Section
                 ForEach(lesson.steps) { step in
-                    StepActionItems(step: step) { item in
+                    StepActionItems(
+                        step: step,
+                        onItemComplete: { item in
+                            if completedItems.contains(item.itemId) {
+                                completedItems.remove(item.itemId)
+                            } else {
+                                completedItems.insert(item.itemId)
+                            }
+                            
+                            // Check if step is completed
+                            let stepCompleted = step.actionItems
+                                .filter { $0.isRequired }
+                                .allSatisfy { completedItems.contains($0.itemId) }
+                            
+                            if stepCompleted {
+                                completedSteps.insert(step.stepId)
+                            } else {
+                                completedSteps.remove(step.stepId)
+                            }
+                            
+                            hasUnsavedChanges = true
+                        },
+                        completedSteps: $completedSteps,
+                        completedItems: $completedItems
+                    )
+                }
+                
+                // Save Progress Button
+                if hasUnsavedChanges {
+                    Button {
                         Task {
-                            await viewModel.updateLessonProgress(
-                                lesson,
-                                stepId: step.id,
-                                actionItemId: item.id
-                            )
+                            await saveProgress()
                         }
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.up.doc")
+                            Text("Save Progress")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                     }
+                    .padding()
                 }
                 
                 // Action Buttons
@@ -283,29 +323,38 @@ struct LessonDetailView: View {
         }
     }
     
-    private func calculateProgress() -> Double {
-        let completedItems = lesson.steps.reduce(0) { sum, step in
-            sum + step.actionItems.filter { $0.isCompleted }.count
+    private func saveProgress() async {
+        do {
+            try await viewModel.updateBatchProgress(
+                category: "smartphoneBasics",
+                lessonId: lesson.lessonId,
+                completedSteps: Array(completedSteps),
+                completedItems: Array(completedItems)
+            )
+            hasUnsavedChanges = false
+            showingSaveConfirmation = true
+        } catch {
+            print("Error saving progress:", error)
         }
-        
-        let totalRequiredItems = lesson.steps.reduce(0) { sum, step in
+    }
+    
+    private func calculateProgress() -> Double {
+        let totalRequired = lesson.steps.reduce(0) { sum, step in
             sum + step.actionItems.filter { $0.isRequired }.count
         }
         
-        return totalRequiredItems > 0 ? Double(completedItems) / Double(totalRequiredItems) : 0
+        return totalRequired > 0 ? Double(completedItems.count) / Double(totalRequired) : 0
     }
 }
 
 struct ActionItemRow: View {
     let item: ActionItem
+    let isCompleted: Bool
     let onComplete: () -> Void
-    @State private var isCompleted = false
     
     var body: some View {
         HStack {
-            // Checkbox Button
             Button {
-                isCompleted.toggle()
                 onComplete()
             } label: {
                 Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
@@ -313,7 +362,6 @@ struct ActionItemRow: View {
                     .font(.system(size: 22))
             }
             
-            // Task Text
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.task)
                     .font(.system(size: 16))
@@ -329,41 +377,44 @@ struct ActionItemRow: View {
             Spacer()
         }
         .padding(.vertical, 8)
-        .contentShape(Rectangle()) // Makes the whole row tappable
-        .onTapGesture {
-            isCompleted.toggle()
-            onComplete()
-        }
     }
 }
 
 struct StepActionItems: View {
     let step: Step
     let onItemComplete: (ActionItem) -> Void
+    @Binding var completedSteps: Set<String>
+    @Binding var completedItems: Set<String>
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(step.title)
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(step.title)
+                    .font(.headline)
+                
+                Spacer()
+                
+                if completedSteps.contains(step.stepId) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                }
+            }
             
             Text(step.description)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(step.actionItems) { item in
-                    ActionItemRow(
-                        item: item,
-                        onComplete: {
-                            onItemComplete(item)
-                        }
-                    )
+            ForEach(step.actionItems) { item in
+                ActionItemRow(
+                    item: item,
+                    isCompleted: completedItems.contains(item.itemId)
+                ) {
+                    onItemComplete(item)
                 }
             }
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(12)
-        .shadow(radius: 1)
     }
 }
