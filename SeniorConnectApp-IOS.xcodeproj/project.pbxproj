@@ -22,6 +22,11 @@
 		BC0F9ECF2CE4876D0016DD1C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9ECE2CE4876D0016DD1C /* LoginView.swift */; };
 		BC0F9ED22CE48EB50016DD1C /* readme.md in Resources */ = {isa = PBXBuildFile; fileRef = BC0F9ED12CE48EB40016DD1C /* readme.md */; };
 		BC0F9ED42CE48EDE0016DD1C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = BC0F9ED32CE48EDE0016DD1C /* .gitignore */; };
+		BC0F9ED62CE4AA4C0016DD1C /* LessonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9ED52CE4AA4C0016DD1C /* LessonService.swift */; };
+		BC0F9ED92CE4ECE20016DD1C /* LessonModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9ED82CE4ECE10016DD1C /* LessonModels.swift */; };
+		BC0F9EDB2CE4ED710016DD1C /* EventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDA2CE4ED710016DD1C /* EventsView.swift */; };
+		BC0F9EDD2CE4EE700016DD1C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */; };
+		BC0F9EDF2CE4EF150016DD1C /* TutorialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +67,11 @@
 		BC0F9ED02CE488580016DD1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BC0F9ED12CE48EB40016DD1C /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = readme.md; sourceTree = "<group>"; };
 		BC0F9ED32CE48EDE0016DD1C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		BC0F9ED52CE4AA4C0016DD1C /* LessonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonService.swift; sourceTree = "<group>"; };
+		BC0F9ED82CE4ECE10016DD1C /* LessonModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonModels.swift; sourceTree = "<group>"; };
+		BC0F9EDA2CE4ED710016DD1C /* EventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
+		BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +124,7 @@
 		BC0F9E982CE486CB0016DD1C /* SeniorConnectApp-IOS */ = {
 			isa = PBXGroup;
 			children = (
+				BC0F9ED72CE4ECCB0016DD1C /* models */,
 				BC0F9ED02CE488580016DD1C /* Info.plist */,
 				BC0F9E992CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift */,
 				BC0F9E9B2CE486CB0016DD1C /* ContentView.swift */,
@@ -123,9 +134,12 @@
 				BC0F9EC42CE486EB0016DD1C /* MainTabView.swift */,
 				BC0F9EC62CE487270016DD1C /* AuthenticationManager.swift */,
 				BC0F9EC82CE4873A0016DD1C /* HomeView.swift */,
-				BC0F9ECA2CE4874D0016DD1C /* AuthModels.swift */,
 				BC0F9ECC2CE4875F0016DD1C /* AuthService.swift */,
 				BC0F9ECE2CE4876D0016DD1C /* LoginView.swift */,
+				BC0F9ED52CE4AA4C0016DD1C /* LessonService.swift */,
+				BC0F9EDA2CE4ED710016DD1C /* EventsView.swift */,
+				BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */,
+				BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -153,6 +167,15 @@
 				BC0F9EB72CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift */,
 			);
 			path = "SeniorConnectApp-IOSUITests";
+			sourceTree = "<group>";
+		};
+		BC0F9ED72CE4ECCB0016DD1C /* models */ = {
+			isa = PBXGroup;
+			children = (
+				BC0F9ECA2CE4874D0016DD1C /* AuthModels.swift */,
+				BC0F9ED82CE4ECE10016DD1C /* LessonModels.swift */,
+			);
+			path = models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -288,12 +311,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC0F9E9C2CE486CB0016DD1C /* ContentView.swift in Sources */,
+				BC0F9ED92CE4ECE20016DD1C /* LessonModels.swift in Sources */,
 				BC0F9ECB2CE4874D0016DD1C /* AuthModels.swift in Sources */,
 				BC0F9EC72CE487270016DD1C /* AuthenticationManager.swift in Sources */,
+				BC0F9EDF2CE4EF150016DD1C /* TutorialViewModel.swift in Sources */,
+				BC0F9ED62CE4AA4C0016DD1C /* LessonService.swift in Sources */,
 				BC0F9E9A2CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift in Sources */,
 				BC0F9EC92CE4873A0016DD1C /* HomeView.swift in Sources */,
+				BC0F9EDD2CE4EE700016DD1C /* Helpers.swift in Sources */,
 				BC0F9EC52CE486EB0016DD1C /* MainTabView.swift in Sources */,
 				BC0F9ECF2CE4876D0016DD1C /* LoginView.swift in Sources */,
+				BC0F9EDB2CE4ED710016DD1C /* EventsView.swift in Sources */,
 				BC0F9ECD2CE4875F0016DD1C /* AuthService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

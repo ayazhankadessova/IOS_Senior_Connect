@@ -20,5 +20,14 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 13 Nov 
 - [ ] Smartphone Basics Frontend
 - [ ] Smartphone Basics Backend
+- [ ] Make Backend more readable -> diff folders PLSSSS AYAZHHHH
+- [x] fetched lessons from the backend
+- [x] move lesson models to diff folder!
+- [ ] add save progress button
+
+
+
+Ideas:
+1. Add offline support?
 
 
