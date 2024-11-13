@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  SeniorConnectApp-IOS
+//  SeniorConnectApp
 //
 //  Created by Аяжан on 13/11/2024.
 //

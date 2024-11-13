@@ -9,9 +9,17 @@ import SwiftUI
 
 @main
 struct SeniorConnectApp_IOSApp: App {
+    @StateObject private var authService = AuthService()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if authService.isAuthenticated {
+                MainTabView()
+                    .environmentObject(authService)
+            } else {
+                LoginView()
+                    .environmentObject(authService)
+            }
         }
     }
 }

@@ -14,6 +14,14 @@
 		BC0F9EAC2CE486CD0016DD1C /* SeniorConnectApp_IOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EAB2CE486CD0016DD1C /* SeniorConnectApp_IOSTests.swift */; };
 		BC0F9EB62CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EB52CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift */; };
 		BC0F9EB82CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EB72CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift */; };
+		BC0F9EC52CE486EB0016DD1C /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EC42CE486EB0016DD1C /* MainTabView.swift */; };
+		BC0F9EC72CE487270016DD1C /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EC62CE487270016DD1C /* AuthenticationManager.swift */; };
+		BC0F9EC92CE4873A0016DD1C /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EC82CE4873A0016DD1C /* HomeView.swift */; };
+		BC0F9ECB2CE4874D0016DD1C /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9ECA2CE4874D0016DD1C /* AuthModels.swift */; };
+		BC0F9ECD2CE4875F0016DD1C /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9ECC2CE4875F0016DD1C /* AuthService.swift */; };
+		BC0F9ECF2CE4876D0016DD1C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9ECE2CE4876D0016DD1C /* LoginView.swift */; };
+		BC0F9ED22CE48EB50016DD1C /* readme.md in Resources */ = {isa = PBXBuildFile; fileRef = BC0F9ED12CE48EB40016DD1C /* readme.md */; };
+		BC0F9ED42CE48EDE0016DD1C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = BC0F9ED32CE48EDE0016DD1C /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +53,15 @@
 		BC0F9EB12CE486CD0016DD1C /* SeniorConnectApp-IOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SeniorConnectApp-IOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC0F9EB52CE486CD0016DD1C /* SeniorConnectApp_IOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeniorConnectApp_IOSUITests.swift; sourceTree = "<group>"; };
 		BC0F9EB72CE486CD0016DD1C /* SeniorConnectApp_IOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeniorConnectApp_IOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		BC0F9EC42CE486EB0016DD1C /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		BC0F9EC62CE487270016DD1C /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		BC0F9EC82CE4873A0016DD1C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		BC0F9ECA2CE4874D0016DD1C /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
+		BC0F9ECC2CE4875F0016DD1C /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		BC0F9ECE2CE4876D0016DD1C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		BC0F9ED02CE488580016DD1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BC0F9ED12CE48EB40016DD1C /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = readme.md; sourceTree = "<group>"; };
+		BC0F9ED32CE48EDE0016DD1C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +92,8 @@
 		BC0F9E8D2CE486CB0016DD1C = {
 			isa = PBXGroup;
 			children = (
+				BC0F9ED32CE48EDE0016DD1C /* .gitignore */,
+				BC0F9ED12CE48EB40016DD1C /* readme.md */,
 				BC0F9E982CE486CB0016DD1C /* SeniorConnectApp-IOS */,
 				BC0F9EAA2CE486CD0016DD1C /* SeniorConnectApp-IOSTests */,
 				BC0F9EB42CE486CD0016DD1C /* SeniorConnectApp-IOSUITests */,
@@ -95,11 +114,18 @@
 		BC0F9E982CE486CB0016DD1C /* SeniorConnectApp-IOS */ = {
 			isa = PBXGroup;
 			children = (
+				BC0F9ED02CE488580016DD1C /* Info.plist */,
 				BC0F9E992CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift */,
 				BC0F9E9B2CE486CB0016DD1C /* ContentView.swift */,
 				BC0F9E9D2CE486CD0016DD1C /* Assets.xcassets */,
 				BC0F9E9F2CE486CD0016DD1C /* SeniorConnectApp_IOS.entitlements */,
 				BC0F9EA02CE486CD0016DD1C /* Preview Content */,
+				BC0F9EC42CE486EB0016DD1C /* MainTabView.swift */,
+				BC0F9EC62CE487270016DD1C /* AuthenticationManager.swift */,
+				BC0F9EC82CE4873A0016DD1C /* HomeView.swift */,
+				BC0F9ECA2CE4874D0016DD1C /* AuthModels.swift */,
+				BC0F9ECC2CE4875F0016DD1C /* AuthService.swift */,
+				BC0F9ECE2CE4876D0016DD1C /* LoginView.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -233,7 +259,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC0F9ED42CE48EDE0016DD1C /* .gitignore in Resources */,
 				BC0F9EA22CE486CD0016DD1C /* Preview Assets.xcassets in Resources */,
+				BC0F9ED22CE48EB50016DD1C /* readme.md in Resources */,
 				BC0F9E9E2CE486CD0016DD1C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -260,7 +288,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC0F9E9C2CE486CB0016DD1C /* ContentView.swift in Sources */,
+				BC0F9ECB2CE4874D0016DD1C /* AuthModels.swift in Sources */,
+				BC0F9EC72CE487270016DD1C /* AuthenticationManager.swift in Sources */,
 				BC0F9E9A2CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift in Sources */,
+				BC0F9EC92CE4873A0016DD1C /* HomeView.swift in Sources */,
+				BC0F9EC52CE486EB0016DD1C /* MainTabView.swift in Sources */,
+				BC0F9ECF2CE4876D0016DD1C /* LoginView.swift in Sources */,
+				BC0F9ECD2CE4875F0016DD1C /* AuthService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,6 +458,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SeniorConnectApp-IOS/Info.plist";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -462,6 +498,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SeniorConnectApp-IOS/Info.plist";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
