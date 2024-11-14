@@ -10,23 +10,14 @@ import SwiftUI
 
 // Models for progress tracking
 // Models for server response
-struct CategoryProgressResponse: Codable {
-    let categoryProgress: [LessonProgress]
-    let overallProgress: OverallProgress
-    
-    enum CodingKeys: String, CodingKey {
-        case categoryProgress
-        case overallProgress
-    }
-}
 
-struct LessonProgress: Codable, Identifiable {
+struct CategoryLessonProgress: Codable, Identifiable {
     let id: String
     let lessonId: String
     let completed: Bool
-    let lastAccessed: Date
+    let lastAccessed: Date  // This will now be properly decoded
     let completedSteps: [String]
-    let completedActionItems: [String]
+    let stepProgress: [StepProgress]
     let quizScores: [QuizScore]
     let savedForLater: Bool
     let needsMentorHelp: Bool
@@ -37,17 +28,62 @@ struct LessonProgress: Codable, Identifiable {
         case completed
         case lastAccessed
         case completedSteps
-        case completedActionItems
+        case stepProgress
         case quizScores
         case savedForLater
         case needsMentorHelp
     }
 }
 
+
+struct CategoryProgressResponse: Codable {
+    let categoryProgress: [CategoryLessonProgress]
+    let overallProgress: OverallProgress
+}
+
+struct ProgressResponse: Codable {
+    let progress: CategoryLessonProgress
+    let overallProgress: OverallProgress
+}
+
+struct LessonProgress: Codable, Identifiable {
+    let id: String
+    let lessonId: String
+    let completed: Bool
+    let lastAccessed: Date
+    let completedSteps: [String]
+    let stepProgress: [StepProgress]
+    let quizScores: [QuizScore]
+    let savedForLater: Bool
+    let needsMentorHelp: Bool
+    let mentorNotes: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case lessonId
+        case completed
+        case lastAccessed
+        case completedSteps
+        case stepProgress
+        case quizScores
+        case savedForLater
+        case needsMentorHelp
+        case mentorNotes
+    }
+}
+
 struct OverallProgress: Codable {
     let totalLessonsCompleted: Int
     let averageQuizScore: Double
-    let lastActivityDate: Date
+    let lastActivityDate: Date  // This will now be properly decoded
+}
+
+extension Date {
+    func formatted() -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter.localizedString(for: self, relativeTo: Date())
+    }
 }
 
 struct QuizScore: Codable {
@@ -55,48 +91,18 @@ struct QuizScore: Codable {
     let attemptDate: Date
 }
 
-struct BatchProgress: Codable {
+struct BatchProgressRequest: Codable {
     let category: String
     let lessonId: String
     let completedSteps: [String]
-    let completedItems: [String]
-    let needsMentorHelp: Bool
+    let stepActions: [StepAction]
+    let savedForLater: Bool?
+    let needsMentorHelp: Bool?
     let mentorNotes: String?
-    let savedForLater: Bool
     
-    init(
-        category: String,
-        lessonId: String,
-        completedSteps: [String],
-        completedItems: [String],
-        needsMentorHelp: Bool = false,
-        mentorNotes: String? = nil,
-        savedForLater: Bool = false
-    ) {
-        self.category = category
-        self.lessonId = lessonId
-        self.completedSteps = completedSteps
-        self.completedItems = completedItems
-        self.needsMentorHelp = needsMentorHelp
-        self.mentorNotes = mentorNotes
-        self.savedForLater = savedForLater
-    }
-}
-
-struct ProgressResponse: Codable {
-    let progress: Progress
-    let overallProgress: OverallProgress
-    
-    struct Progress: Codable {
-        let lessonId: String
-        let completed: Bool
-        let lastAccessed: Date
-        let completedSteps: [String]
-        let completedActionItems: [String]
-        let quizScores: [QuizScore]
-        let savedForLater: Bool
-        let needsMentorHelp: Bool
-        let mentorNotes: String?
+    struct StepAction: Codable {
+        let stepId: String
+        let actionItems: [String]
     }
 }
 
@@ -254,3 +260,14 @@ struct QuickAction: Identifiable {
     let icon: String
     let color: Color
 }
+
+struct StepActionIdentifier: Hashable {
+    let stepId: String
+    let actionItemId: String
+}
+//
+//struct StepProgress: Codable {
+//    let stepId: String
+//    let completedActionItems: [String]
+//}
+

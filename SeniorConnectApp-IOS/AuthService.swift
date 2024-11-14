@@ -32,7 +32,7 @@ class AuthService: ObservableObject {
     private let baseURL = "http://localhost:3000"
     private let decoder = JSONDecoder()
     
-    func login(email: String, password: String) async throws -> AuthUser {
+    func login(email: String, password: String) async throws {
         guard let url = URL(string: "\(baseURL)/api/users/login") else {
             throw AuthError.networkError
         }
@@ -47,43 +47,19 @@ class AuthService: ObservableObject {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
-            // Debug print
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Login response:", jsonString)
-            }
-            
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw AuthError.networkError
             }
             
             switch httpResponse.statusCode {
             case 200...299:
-                do {
-                    let user = try decoder.decode(AuthUser.self, from: data)
-                    await MainActor.run {
-                        self.currentUser = user
-                        self.isAuthenticated = true
-                    }
-                    return user
-                } catch let DecodingError.dataCorrupted(context) {
-                    print("Data corrupted:", context)
-                    throw AuthError.decodingError("Data corrupted: \(context.debugDescription)")
-                } catch let DecodingError.keyNotFound(key, context) {
-                    print("Key '\(key.stringValue)' not found:", context.debugDescription)
-                    print("codingPath:", context.codingPath)
-                    throw AuthError.decodingError("Missing key '\(key.stringValue)'")
-                } catch let DecodingError.typeMismatch(type, context) {
-                    print("Type '\(type)' mismatch:", context.debugDescription)
-                    print("codingPath:", context.codingPath)
-                    throw AuthError.decodingError("Type mismatch: expected \(type)")
-                } catch let DecodingError.valueNotFound(type, context) {
-                    print("Value of type '\(type)' not found:", context.debugDescription)
-                    print("codingPath:", context.codingPath)
-                    throw AuthError.decodingError("Value of type '\(type)' missing")
-                } catch {
-                    print("Other decoding error:", error)
-                    throw AuthError.decodingError(error.localizedDescription)
+                // Use custom decoder for date handling
+                let user = try JSONDecoder.authDecoder.decode(AuthUser.self, from: data)
+                await MainActor.run {
+                    self.currentUser = user
+                    self.isAuthenticated = true
                 }
+//                return user
             case 401:
                 throw AuthError.invalidCredentials
             default:

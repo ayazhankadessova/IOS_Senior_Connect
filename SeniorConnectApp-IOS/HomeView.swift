@@ -89,6 +89,26 @@ struct TutorialDetailView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     
+    private func findLessonProgress(for lessonId: String) -> CategoryLessonProgress? {
+            guard let user = authService.currentUser else { return nil }
+            return user.progress.smartphoneBasics.first { $0.lessonId == lessonId }
+        }
+    
+    private func refreshData() async throws {
+            do {
+                // Fetch latest lessons
+                try await lessonService.fetchLessons(
+                    category: category.name,
+                    userId: authService.currentUser?.id ?? ""
+                )
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
+            }
+        }
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -109,13 +129,13 @@ struct TutorialDetailView: View {
                         NavigationLink {
                             LessonDetailView(
                                 lesson: lesson,
-                                progress: lessonService.lessonsProgress[lesson.lessonId],
+                                progress: findLessonProgress(for: lesson.lessonId),
                                 userId: authService.currentUser?.id ?? ""
                             )
                         } label: {
                             LessonRowView(
                                 lesson: lesson,
-                                progress: lessonService.lessonsProgress[lesson.lessonId]
+                                progress: findLessonProgress(for: lesson.lessonId)
                             )
                             .padding(.horizontal)
                         }
@@ -135,22 +155,28 @@ struct TutorialDetailView: View {
             Text(errorMessage)
         }
         .task {
-            do {
-                try await lessonService.fetchLessons(
-                    category: category.name,
-                    userId: authService.currentUser?.id ?? ""
-                )
-            } catch {
-                showError = true
-                errorMessage = error.localizedDescription
-            }
+            try? await refreshData()
         }
+        .refreshable {
+            try? await refreshData()
+        }
+//        .task {
+//            do {
+//                try await lessonService.fetchLessons(
+//                    category: category.name,
+//                    userId: authService.currentUser?.id ?? ""
+//                )
+//            } catch {
+//                showError = true
+//                errorMessage = error.localizedDescription
+//            }
+//        }
     }
 }
 
 struct LessonRowView: View {
     let lesson: Lesson
-    let progress: LessonProgress?
+    let progress: CategoryLessonProgress?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -214,8 +240,9 @@ struct VideoPlayerView: View {
 }
 
 struct LessonDetailView: View {
+    @EnvironmentObject var authService: AuthService
     @State var lesson: Lesson
-    @State var progress: LessonProgress?
+    @State var progress: CategoryLessonProgress?
     let userId: String
     @StateObject private var viewModel: TutorialViewModel
     @State private var showingVideo = false
@@ -227,10 +254,15 @@ struct LessonDetailView: View {
     
     // Progress tracking
     @State private var completedSteps: Set<String> = []
-    @State private var completedItems: Set<String> = []
+    @State private var completedStepActions: Set<StepActionIdentifier> = []
     @State private var hasUnsavedChanges = false
     
-    init(lesson: Lesson, progress: LessonProgress? = nil, userId: String) {
+    private func findLessonProgress(for lessonId: String) -> CategoryLessonProgress? {
+            guard let user = authService.currentUser else { return nil }
+            return user.progress.smartphoneBasics.first { $0.lessonId == lessonId }
+        }
+    
+    init(lesson: Lesson, progress: CategoryLessonProgress? = nil, userId: String) {
             self._lesson = State(initialValue: lesson)
             self._progress = State(initialValue: progress)
             self.userId = userId
@@ -241,7 +273,7 @@ struct LessonDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Video Section
-                if let videoURL = lesson.videoUrl {
+//                if let videoURL = lesson.videoUrl {
                     Button {
                         showingVideo = true
                     } label: {
@@ -256,12 +288,8 @@ struct LessonDetailView: View {
                         }
                         .cornerRadius(12)
                     }
-                }
+//                }
                 
-                // Progress Section
-//                ProgressView(value: calculateProgress())
-//                    .tint(.blue)
-//                    .padding(.horizontal)
                 
                 if let progress = progress {
                     VStack(alignment: .leading, spacing: 8) {
@@ -270,15 +298,23 @@ struct LessonDetailView: View {
                                 .foregroundColor(.green)
                         }
                         
-                        Text("Last accessed: \(progress.lastAccessed)")
+                        Text("Last accessed: \(progress.lastAccessed.formatted())")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         
-                        // Show completed items
-                        ForEach(progress.completedSteps, id: \.self) { stepId in
-                            if let step = lesson.steps.first(where: { $0.stepId == stepId }) {
-                                Text("✓ \(step.title)")
-                                    .foregroundColor(.green)
+                        ForEach(progress.stepProgress) { stepProgress in
+                            if let step = lesson.steps.first(where: { $0.stepId == stepProgress.stepId }) {
+                                VStack(alignment: .leading) {
+                                    Text(step.title)
+                                        .font(.headline)
+                                    
+                                    ForEach(step.actionItems.filter { item in
+                                        stepProgress.completedActionItems.contains(item.itemId)
+                                    }) { item in
+                                        Text("✓ \(item.task)")
+                                            .foregroundColor(.green)
+                                    }
+                                }
                             }
                         }
                     }
@@ -292,16 +328,28 @@ struct LessonDetailView: View {
                     StepActionItems(
                         step: step,
                         onItemComplete: { item in
-                            if completedItems.contains(item.itemId) {
-                                completedItems.remove(item.itemId)
+                            let identifier = StepActionIdentifier(
+                                stepId: step.stepId,
+                                actionItemId: item.itemId
+                            )
+                            
+                            if completedStepActions.contains(identifier) {
+                                completedStepActions.remove(identifier)
                             } else {
-                                completedItems.insert(item.itemId)
+                                completedStepActions.insert(identifier)
                             }
                             
                             // Check if step is completed
                             let stepCompleted = step.actionItems
                                 .filter { $0.isRequired }
-                                .allSatisfy { completedItems.contains($0.itemId) }
+                                .allSatisfy { actionItem in
+                                    completedStepActions.contains(
+                                        StepActionIdentifier(
+                                            stepId: step.stepId,
+                                            actionItemId: actionItem.itemId
+                                        )
+                                    )
+                                }
                             
                             if stepCompleted {
                                 completedSteps.insert(step.stepId)
@@ -312,9 +360,11 @@ struct LessonDetailView: View {
                             hasUnsavedChanges = true
                         },
                         completedSteps: $completedSteps,
-                        completedItems: $completedItems
+                        completedStepActions: $completedStepActions,
+                        currentStepId: step.stepId
                     )
                 }
+                                
                 
                 // Save Progress Button
                 if hasUnsavedChanges {
@@ -325,10 +375,16 @@ struct LessonDetailView: View {
                                     category: "smartphoneBasics",
                                     lessonId: lesson.lessonId,
                                     completedSteps: Array(completedSteps),
-                                    completedItems: Array(completedItems)
+                                    completedStepActions: completedStepActions
                                 )
                                 hasUnsavedChanges = false
                                 showingSaveConfirmation = true
+                                
+                                // Refresh user data
+//                                try await authService.refreshUserData()
+                                
+                                // Update local progress
+                                progress = findLessonProgress(for: lesson.lessonId)
                             } catch {
                                 errorMessage = "Failed to save progress: \(error.localizedDescription)"
                                 showError = true
@@ -400,36 +456,24 @@ struct LessonDetailView: View {
         } message: {
             Text(errorMessage)
         }.onAppear {
-            // Initialize completed items from saved progress
+            // Initialize from saved progress
             if let progress = progress {
                 completedSteps = Set(progress.completedSteps)
-                completedItems = Set(progress.completedActionItems)
+                
+                // Create step-action identifiers from step progress
+                let stepActions = progress.stepProgress.flatMap { stepProgress in
+                    stepProgress.completedActionItems.map { actionId in
+                        StepActionIdentifier(
+                            stepId: stepProgress.stepId,
+                            actionItemId: actionId
+                        )
+                    }
+                }
+                completedStepActions = Set(stepActions)
             }
         }
     }
     
-    private func saveProgress() async {
-        do {
-            try await viewModel.updateBatchProgress(
-                category: "smartphoneBasics",
-                lessonId: lesson.lessonId,
-                completedSteps: Array(completedSteps),
-                completedItems: Array(completedItems)
-            )
-            hasUnsavedChanges = false
-            showingSaveConfirmation = true
-        } catch {
-            print("Error saving progress:", error)
-        }
-    }
-    
-    private func calculateProgress() -> Double {
-        let totalRequired = lesson.steps.reduce(0) { sum, step in
-            sum + step.actionItems.filter { $0.isRequired }.count
-        }
-        
-        return totalRequired > 0 ? Double(completedItems.count) / Double(totalRequired) : 0
-    }
 }
 
 struct CategoryHeaderView: View {
@@ -490,7 +534,8 @@ struct StepActionItems: View {
     let step: Step
     let onItemComplete: (ActionItem) -> Void
     @Binding var completedSteps: Set<String>
-    @Binding var completedItems: Set<String>
+    @Binding var completedStepActions: Set<StepActionIdentifier>
+    let currentStepId: String
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -513,7 +558,12 @@ struct StepActionItems: View {
             ForEach(step.actionItems) { item in
                 ActionItemRow(
                     item: item,
-                    isCompleted: completedItems.contains(item.itemId)
+                    isCompleted: completedStepActions.contains(
+                        StepActionIdentifier(
+                            stepId: currentStepId,
+                            actionItemId: item.itemId
+                        )
+                    )
                 ) {
                     onItemComplete(item)
                 }

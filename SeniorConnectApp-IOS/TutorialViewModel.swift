@@ -22,22 +22,29 @@ class TutorialViewModel: ObservableObject {
         self.userId = userId
     }
     
-    func updateUserId(_ newId: String) {
-        // Not needed anymore since we're using initialization
-    }
-    
     func updateBatchProgress(
         category: String,
         lessonId: String,
         completedSteps: [String],
-        completedItems: [String]
+        completedStepActions: Set<StepActionIdentifier>
     ) async throws {
-        let progress = BatchProgress(
+        // Group completed actions by step
+        let stepActionsDict = Dictionary(grouping: completedStepActions) { $0.stepId }
+        let stepActions = stepActionsDict.map { stepId, identifiers in
+            BatchProgressRequest.StepAction(
+                stepId: stepId,
+                actionItems: identifiers.map { $0.actionItemId }
+            )
+        }
+        
+        let progress = BatchProgressRequest(
             category: category,
             lessonId: lessonId,
             completedSteps: completedSteps,
-            completedItems: completedItems
-            // Will use default values for other parameters
+            stepActions: stepActions,
+            savedForLater: nil,
+            needsMentorHelp: nil,
+            mentorNotes: nil
         )
         
         let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/batch")!
@@ -49,17 +56,19 @@ class TutorialViewModel: ObservableObject {
         request.httpBody = try encoder.encode(progress)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder.progressDecoder.decode(ProgressResponse.self, from: data)
+        let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
         debugPrint("Progress updated:", response)
     }
     
     func saveForLater(_ lesson: Lesson) async throws {
-        let progress = BatchProgress(
+        let progress = BatchProgressRequest(
             category: "smartphoneBasics",
             lessonId: lesson.lessonId,
             completedSteps: [],
-            completedItems: [],
-            savedForLater: true  // Override default value
+            stepActions: [],
+            savedForLater: true,
+            needsMentorHelp: nil,
+            mentorNotes: nil
         )
         
         let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/batch")!
@@ -71,17 +80,18 @@ class TutorialViewModel: ObservableObject {
         request.httpBody = try encoder.encode(progress)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder.progressDecoder.decode(ProgressResponse.self, from: data)
+        let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
         debugPrint("Saved for later:", response)
     }
     
     func requestMentorHelp(for lesson: Lesson, notes: String? = nil) async throws {
-        let progress = BatchProgress(
+        let progress = BatchProgressRequest(
             category: "smartphoneBasics",
             lessonId: lesson.lessonId,
             completedSteps: [],
-            completedItems: [],
-            needsMentorHelp: true,  // Override default value
+            stepActions: [],
+            savedForLater: nil,
+            needsMentorHelp: true,
             mentorNotes: notes
         )
         
@@ -94,13 +104,13 @@ class TutorialViewModel: ObservableObject {
         request.httpBody = try encoder.encode(progress)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder.progressDecoder.decode(ProgressResponse.self, from: data)
+        let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
         debugPrint("Mentor help requested:", response)
     }
 }
 
 extension JSONDecoder {
-    static var progressDecoder: JSONDecoder {
+    static var authDecoder: JSONDecoder {
         let decoder = JSONDecoder()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -121,7 +131,6 @@ extension JSONDecoder {
                 )
             )
         }
-        
         return decoder
     }
 }

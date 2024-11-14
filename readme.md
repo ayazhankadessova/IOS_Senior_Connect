@@ -24,7 +24,14 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - [x] fetched lessons from the backend
 - [x] move lesson models to diff folder!
 - [x] add save progress button
-- [ ] let user update the progress whenever they want!
+- [x] let user update the progress whenever they want!
+
+14 Nov
+
+- [x] Complete lessons w multiple sections
+- [ ] go thru the code 
+- [ ] fix get progress backed
+- [ ] Get data properly from the backend on stepProgress and show it 
 
 
 

@@ -4,8 +4,8 @@ struct AuthUser: Codable {
     let id: String
     let name: String
     let email: String
-    var progress: UserProgress
-    var overallProgress: OverallProgress
+    let progress: UserProgress
+    let overallProgress: OverallProgress
     let v: Int
     
     enum CodingKeys: String, CodingKey {
@@ -16,59 +16,22 @@ struct AuthUser: Codable {
         case overallProgress
         case v = "__v"
     }
-    
-    struct UserProgress: Codable {
-        var smartphoneBasics: [LessonProgress]
-        var digitalLiteracy: [LessonProgress]
-        var socialMedia: [LessonProgress]
-        var iot: [LessonProgress]
-    }
-    
-    struct LessonProgress: Codable {
-        var id: String
-        var lessonId: String
-        var completed: Bool
-        var lastAccessed: String
-        var completedSteps: [String]
-        var completedActionItems: [String]
-        var quizScores: [Int]
-        var savedForLater: Bool
-        var needsMentorHelp: Bool
-        
-        enum CodingKeys: String, CodingKey {
-            case id = "_id"
-            case lessonId
-            case completed
-            case lastAccessed
-            case completedSteps
-            case completedActionItems
-            case quizScores
-            case savedForLater
-            case needsMentorHelp
-        }
-    }
-    
-    struct OverallProgress: Codable {
-        var totalLessonsCompleted: Int
-        var averageQuizScore: Double
-        var lastActivityDate: String
-    }
 }
 
 // Extensions for date handling
-extension AuthUser.LessonProgress {
-    var lastAccessedDate: Date? {
-        let formatter = ISO8601DateFormatter()
-        return formatter.date(from: lastAccessed)
-    }
-}
-
-extension AuthUser.OverallProgress {
-    var activityDate: Date? {
-        let formatter = ISO8601DateFormatter()
-        return formatter.date(from: lastActivityDate)
-    }
-}
+//extension AuthUser.LessonProgress {
+//    var lastAccessedDate: Date? {
+//        let formatter = ISO8601DateFormatter()
+//        return formatter.date(from: lastAccessed)
+//    }
+//}
+//
+//extension AuthUser.OverallProgress {
+//    var activityDate: Date? {
+//        let formatter = ISO8601DateFormatter()
+//        return formatter.date(from: lastActivityDate)
+//    }
+//}
 
 struct LoginResponse: Codable {
     let user: AuthUser
@@ -98,3 +61,40 @@ struct SignupCredentials: Codable {
 //    case unknown
 //    case decodingError(Error)
 //}
+
+struct AuthResponse: Codable {
+    let progress: UserProgress
+    let overallProgress: OverallProgress
+    let id: String
+    let name: String
+    let email: String
+    let v: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case progress
+        case overallProgress
+        case id = "_id"
+        case name
+        case email
+        case v = "__v"
+    }
+}
+
+struct UserProgress: Codable {
+    let smartphoneBasics: [CategoryLessonProgress]
+    let digitalLiteracy: [CategoryLessonProgress]
+    let socialMedia: [CategoryLessonProgress]
+    let iot: [CategoryLessonProgress]
+}
+
+struct StepProgress: Codable, Identifiable {
+    let id: String
+    let stepId: String
+    let completedActionItems: [String]
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case stepId
+        case completedActionItems
+    }
+}
