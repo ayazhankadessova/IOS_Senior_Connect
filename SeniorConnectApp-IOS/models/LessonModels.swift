@@ -9,14 +9,78 @@ import Foundation
 import SwiftUI
 
 // Models for progress tracking
-struct LessonProgress: Codable {
+// Models for server response
+struct CategoryProgressResponse: Codable {
+    let categoryProgress: [LessonProgress]
+    let overallProgress: OverallProgress
+    
+    enum CodingKeys: String, CodingKey {
+        case categoryProgress
+        case overallProgress
+    }
+}
+
+struct LessonProgress: Codable, Identifiable {
+    let id: String
+    let lessonId: String
+    let completed: Bool
+    let lastAccessed: Date
+    let completedSteps: [String]
+    let completedActionItems: [String]
+    let quizScores: [QuizScore]
+    let savedForLater: Bool
+    let needsMentorHelp: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case lessonId
+        case completed
+        case lastAccessed
+        case completedSteps
+        case completedActionItems
+        case quizScores
+        case savedForLater
+        case needsMentorHelp
+    }
+}
+
+struct OverallProgress: Codable {
+    let totalLessonsCompleted: Int
+    let averageQuizScore: Double
+    let lastActivityDate: Date
+}
+
+struct QuizScore: Codable {
+    let score: Int
+    let attemptDate: Date
+}
+
+struct BatchProgress: Codable {
     let category: String
     let lessonId: String
-    let stepId: String?
-    let actionItemId: String?
-    let savedForLater: Bool?
-    let needsMentorHelp: Bool?
+    let completedSteps: [String]
+    let completedItems: [String]
+    let needsMentorHelp: Bool
     let mentorNotes: String?
+    let savedForLater: Bool
+    
+    init(
+        category: String,
+        lessonId: String,
+        completedSteps: [String],
+        completedItems: [String],
+        needsMentorHelp: Bool = false,
+        mentorNotes: String? = nil,
+        savedForLater: Bool = false
+    ) {
+        self.category = category
+        self.lessonId = lessonId
+        self.completedSteps = completedSteps
+        self.completedItems = completedItems
+        self.needsMentorHelp = needsMentorHelp
+        self.mentorNotes = mentorNotes
+        self.savedForLater = savedForLater
+    }
 }
 
 struct ProgressResponse: Codable {
@@ -34,18 +98,13 @@ struct ProgressResponse: Codable {
         let needsMentorHelp: Bool
         let mentorNotes: String?
     }
-    
-    struct QuizScore: Codable {
-        let score: Int
-        let attemptDate: Date
-    }
 }
 
-struct OverallProgress: Codable {
-    let totalLessonsCompleted: Int
-    let averageQuizScore: Double
-    let lastActivityDate: Date
-}
+//struct OverallProgress: Codable {
+//    let totalLessonsCompleted: Int
+//    let averageQuizScore: Double
+//    let lastActivityDate: Date
+//}
 
 enum NetworkError: Error {
     case invalidURL
@@ -195,11 +254,3 @@ struct QuickAction: Identifiable {
     let icon: String
     let color: Color
 }
-
-struct BatchProgress: Codable {
-    let category: String
-    let lessonId: String
-    let completedSteps: [String]
-    let completedItems: [String]
-}
-

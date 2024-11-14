@@ -2,46 +2,63 @@ import Foundation
 
 class LessonService: ObservableObject {
     @Published var lessons: [Lesson] = []
+    @Published var lessonsProgress: [String: LessonProgress] = [:]
+    @Published var overallProgress: OverallProgress?
     @Published var isLoading = false
     @Published var error: Error?
     
     private let baseURL = "http://localhost:3000"
     
-    func fetchLessons(category: String? = nil) async throws {
-        let urlString = category != nil ?
-            "\(baseURL)/api/lessons?category=\(category!)" :
-            "\(baseURL)/api/lessons"
+    func fetchLessons(category: String, userId: String) async throws {
+        isLoading = true
         
+        do {
+            // Fetch lessons
+            let lessons = try await fetchLessonsFromAPI(category: category)
+            
+            // Fetch progress
+            let progressResponse = try await fetchUserProgress(userId: userId, category: category)
+            
+            await MainActor.run {
+                self.lessons = lessons
+                
+                // Create a dictionary for quick lookup
+                self.lessonsProgress = Dictionary(
+                    uniqueKeysWithValues: progressResponse.categoryProgress.map {
+                        ($0.lessonId, $0)
+                    }
+                )
+                
+                self.overallProgress = progressResponse.overallProgress
+                self.isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                self.error = error
+                self.isLoading = false
+            }
+            throw error
+        }
+    }
+    
+    private func fetchLessonsFromAPI(category: String) async throws -> [Lesson] {
+        let urlString = "\(baseURL)/api/lessons?category=\(category)"
         guard let url = URL(string: urlString) else {
             throw NetworkError.invalidURL
         }
         
         let (data, _) = try await URLSession.shared.data(from: url)
-        let lessons = try JSONDecoder().decode([Lesson].self, from: data)
-        
-        await MainActor.run {
-            self.lessons = lessons
-            self.isLoading = false
-        }
+        return try JSONDecoder.progressDecoder.decode([Lesson].self, from: data)
     }
     
-    func updateLessonProgress(userId: String, progress: LessonProgress) async throws {
-        guard let url = URL(string: "\(baseURL)/api/users/\(userId)/progress") else {
+    private func fetchUserProgress(userId: String, category: String) async throws -> CategoryProgressResponse {
+        let urlString = "\(baseURL)/api/users/\(userId)/progress/\(category)"
+        guard let url = URL(string: urlString) else {
             throw NetworkError.invalidURL
         }
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let body = try JSONEncoder().encode(progress)
-        request.httpBody = body
-        
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let updatedProgress = try JSONDecoder().decode(ProgressResponse.self, from: data)
-        
-        // Update local state if needed
-        print("Progress updated: \(updatedProgress)")
+        let (data, _) = try await URLSession.shared.data(from: url)
+        debugPrint("Progress Response: \(userId)", String(data: data, encoding: .utf8) ?? "")
+        return try JSONDecoder.progressDecoder.decode(CategoryProgressResponse.self, from: data)
     }
-    
 }

@@ -115,3 +115,42 @@ struct QuickActionButton: View {
         }
     }
 }
+
+struct OverallProgressView: View {
+    let progress: OverallProgress
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Overall Progress")
+                .font(.headline)
+            
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Completed Lessons")
+                    Text("\(progress.totalLessonsCompleted)")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                }
+                
+                Spacer()
+                
+                if progress.averageQuizScore > 0 {
+                    VStack(alignment: .leading) {
+                        Text("Quiz Average")
+                        Text("\(Int(progress.averageQuizScore))%")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+            
+            Text("Last Activity: \(progress.lastActivityDate)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 1)
+    }
+}

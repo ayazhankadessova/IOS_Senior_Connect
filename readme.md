@@ -23,7 +23,8 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - [ ] Make Backend more readable -> diff folders PLSSSS AYAZHHHH
 - [x] fetched lessons from the backend
 - [x] move lesson models to diff folder!
-- [ ] add save progress button
+- [x] add save progress button
+- [ ] let user update the progress whenever they want!
 
 
 
