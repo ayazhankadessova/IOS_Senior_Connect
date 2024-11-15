@@ -47,6 +47,7 @@ Users should be able to:
 - see events in given date range, bc there is calendar 
 - Join events (check quota and if event is not in the past). If successfuly joined event, add it to userInfo in events array, as well as in the event object, which will have list of participants.
 - Unjoin events. Remove event from userInfo and from event
+checl
 
 
 
