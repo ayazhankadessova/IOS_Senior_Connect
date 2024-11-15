@@ -6,7 +6,7 @@ const connectDB = require('./config/db')
 
 const authRoutes = require('./routes/auth')
 const lessonRoutes = require('./routes/lessons')
-// const progressRoutes = require('./routes/progress')
+const progressRoutes = require('./routes/progress')
 
 const app = express()
 
@@ -20,7 +20,7 @@ connectDB()
 // Routes
 app.use('/api/users', authRoutes)
 app.use('/api/lessons', lessonRoutes)
-// app.use('/api/users/:userId/progress', progressRoutes)
+app.use('/api/users/:userId/progress', progressRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {
