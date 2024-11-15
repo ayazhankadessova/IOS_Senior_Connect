@@ -9,6 +9,7 @@ import Foundation
 
 import SwiftUI
 import SwiftData
+import WebKit
 
 // MARK: - Home View
 struct HomeView: View {
@@ -214,20 +215,86 @@ struct LessonRowView: View {
     }
 }
 
+struct YouTubePlayerView: UIViewRepresentable {
+    let videoId: String
+    
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.scrollView.isScrollEnabled = false
+        webView.allowsBackForwardNavigationGestures = false
+        return webView
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        // Create YouTube embed HTML with custom parameters
+        let embedHTML = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { margin: 0; }
+                .video-container {
+                    position: relative;
+                    padding-bottom: 56.25%;
+                    height: 0;
+                    overflow: hidden;
+                }
+                .video-container iframe {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/\(videoId)?playsinline=1&rel=0"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </body>
+        </html>
+        """
+        
+        uiView.loadHTMLString(embedHTML, baseURL: nil)
+    }
+}
+
 struct VideoPlayerView: View {
     let videoURL: String
     
+    private var videoId: String? {
+            guard let url = URL(string: videoURL) else { return nil }
+            
+            // Handle different YouTube URL formats
+            if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+                return queryItems.first(where: { $0.name == "v" })?.value
+            }
+            
+            // Handle youtu.be format
+            if url.host == "youtu.be" {
+                return url.lastPathComponent
+            }
+            
+            return nil
+        }
+    
     var body: some View {
         VStack {
-            // Placeholder for video player
-            Text("Video Player")
-                .frame(height: 200)
-                .frame(maxWidth: .infinity)
-                .background(Color.gray.opacity(0.2))
-            
-            Text("Video URL: \(videoURL)")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            if let videoId = videoId {
+                YouTubePlayerView(videoId: videoId)
+                    .frame(height: 220)
+            } else {
+                Text("Invalid YouTube URL")
+                    .frame(height: 200)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.gray.opacity(0.2))
+            }
         }
         .padding()
     }
@@ -292,48 +359,41 @@ struct LessonDetailView: View {
                     showingVideo = true
                 } label: {
                     ZStack {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 200)
-                        
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 50))
-                            .foregroundColor(.blue)
+                        if let _ = lesson.videoUrl {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 200)
+                                .overlay(
+                                    Image(systemName: "play.circle.fill")
+                                        .font(.system(size: 50))
+                                        .foregroundColor(.blue)
+                                )
+                        }
                     }
                     .cornerRadius(12)
                 }
                 
+                Divider().padding(.horizontal)
+                
+                // Curr progress Section
                 if let currentProgress = progress {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        if currentProgress.completed {
-                                            Label("Lesson Completed", systemImage: "checkmark.circle.fill")
-                                                .foregroundColor(.green)
-                                        }
-                                        
-                                        Text("Last accessed: \(currentProgress.lastAccessed.formatted())")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                        
-                                        ForEach(currentProgress.stepProgress) { stepProgress in
-                                            if let step = lesson.steps.first(where: { $0.stepId == stepProgress.stepId }) {
-                                                VStack(alignment: .leading) {
-                                                    Text(step.title)
-                                                        .font(.headline)
-                                                    
-                                                    ForEach(step.actionItems.filter { item in
-                                                        stepProgress.completedActionItems.contains(item.itemId)
-                                                    }) { item in
-                                                        Text("✓ \(item.task)")
-                                                            .foregroundColor(.green)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .padding()
-                                    .background(Color(.systemBackground))
-                                    .cornerRadius(12)
-                                }
+                    VStack(alignment: .leading, spacing: 8) {
+                        if currentProgress.completed {
+                            Label("Lesson Completed", systemImage: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        }
+                        
+                        Text("Last accessed: \(currentProgress.lastAccessed.formatted())")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                    }
+                    .padding()
+                    .background(Color(.systemBackground))
+                    .cornerRadius(10)
+                }
+                
+                Divider().padding(.horizontal)
                 
                 // Steps Section
                 ForEach(lesson.steps) { step in

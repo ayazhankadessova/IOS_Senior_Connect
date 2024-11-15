@@ -30,11 +30,12 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 
 - [x] Complete lessons w multiple sections
 - [ ] go thru the code 
-- [ ] fix get progress backed
-- [ ] Get data properly from the backend on stepProgress and show it 
+- [x] fix get progress backed
+- [x] Get data properly from the backend on stepProgress and show it 
 
 15 nov
 - [ ] Refresh Updates
+- [ ] Make Detail View look good like in drafts
 
 
 Ideas:

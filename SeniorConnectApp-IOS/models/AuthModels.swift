@@ -39,8 +39,21 @@ struct LoginResponse: Codable {
 }
 
 struct SignupResponse: Codable {
-    let user: AuthUser
-    // Add any other fields that come in the response
+    let name: String
+    let email: String
+    let progress: UserProgress
+    let overallProgress: OverallProgress
+    let id: String
+    let v: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case name
+        case email
+        case progress
+        case overallProgress
+        case id = "_id"
+        case v = "__v"
+    }
 }
 
 struct LoginCredentials: Codable {

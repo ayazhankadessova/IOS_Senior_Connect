@@ -27,6 +27,7 @@
 		BC0F9EDB2CE4ED710016DD1C /* EventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDA2CE4ED710016DD1C /* EventsView.swift */; };
 		BC0F9EDD2CE4EE700016DD1C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */; };
 		BC0F9EDF2CE4EF150016DD1C /* TutorialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */; };
+		BCFB77362CE73292000E3574 /* drafts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB77352CE73292000E3574 /* drafts.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +73,7 @@
 		BC0F9EDA2CE4ED710016DD1C /* EventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
 		BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialViewModel.swift; sourceTree = "<group>"; };
+		BCFB77352CE73292000E3574 /* drafts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = drafts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +142,7 @@
 				BC0F9EDA2CE4ED710016DD1C /* EventsView.swift */,
 				BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */,
 				BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */,
+				BCFB77352CE73292000E3574 /* drafts.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -321,6 +324,7 @@
 				BC0F9EDD2CE4EE700016DD1C /* Helpers.swift in Sources */,
 				BC0F9EC52CE486EB0016DD1C /* MainTabView.swift in Sources */,
 				BC0F9ECF2CE4876D0016DD1C /* LoginView.swift in Sources */,
+				BCFB77362CE73292000E3574 /* drafts.swift in Sources */,
 				BC0F9EDB2CE4ED710016DD1C /* EventsView.swift in Sources */,
 				BC0F9ECD2CE4875F0016DD1C /* AuthService.swift in Sources */,
 			);
