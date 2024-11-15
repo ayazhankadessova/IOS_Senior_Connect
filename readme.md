@@ -33,6 +33,8 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - [ ] fix get progress backed
 - [ ] Get data properly from the backend on stepProgress and show it 
 
+15 nov
+- [ ] Refresh Updates
 
 
 Ideas:

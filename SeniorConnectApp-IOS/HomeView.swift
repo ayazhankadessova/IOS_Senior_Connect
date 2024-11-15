@@ -90,24 +90,27 @@ struct TutorialDetailView: View {
     @State private var errorMessage = ""
     
     private func findLessonProgress(for lessonId: String) -> CategoryLessonProgress? {
-            guard let user = authService.currentUser else { return nil }
-            return user.progress.smartphoneBasics.first { $0.lessonId == lessonId }
-        }
+        return lessonService.lessonsProgress[lessonId]
+    }
     
-    private func refreshData() async throws {
-            do {
-                // Fetch latest lessons
-                try await lessonService.fetchLessons(
-                    category: category.name,
-                    userId: authService.currentUser?.id ?? ""
-                )
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
+    func refreshData() async throws {
+        do {
+            // Fetch latest lessons
+            try await lessonService.fetchLessons(
+                category: category.name,
+                userId: authService.currentUser?.id ?? ""
+            )
+            print("Updated Lesson Progress:")
+            for (lessonId, progress) in lessonService.lessonsProgress {
+                print("\(lessonId): completed=\(progress.completed), steps=\(progress.completedSteps.count)")
+            }
+        } catch {
+            await MainActor.run {
+                errorMessage = error.localizedDescription
+                showError = true
             }
         }
+    }
     
     var body: some View {
         ScrollView {
@@ -126,16 +129,18 @@ struct TutorialDetailView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if !lessonService.lessons.isEmpty {
                     ForEach(lessonService.lessons) { lesson in
+                        let progress = findLessonProgress(for: lesson.lessonId)
                         NavigationLink {
                             LessonDetailView(
                                 lesson: lesson,
-                                progress: findLessonProgress(for: lesson.lessonId),
-                                userId: authService.currentUser?.id ?? ""
+                                progress: progress,
+                                userId: authService.currentUser?.id ?? "",
+                                tutorialDetailView: self
                             )
                         } label: {
                             LessonRowView(
                                 lesson: lesson,
-                                progress: findLessonProgress(for: lesson.lessonId)
+                                progress: progress
                             )
                             .padding(.horizontal)
                         }
@@ -160,17 +165,6 @@ struct TutorialDetailView: View {
         .refreshable {
             try? await refreshData()
         }
-//        .task {
-//            do {
-//                try await lessonService.fetchLessons(
-//                    category: category.name,
-//                    userId: authService.currentUser?.id ?? ""
-//                )
-//            } catch {
-//                showError = true
-//                errorMessage = error.localizedDescription
-//            }
-//        }
     }
 }
 
@@ -251,77 +245,95 @@ struct LessonDetailView: View {
     @State private var showingSaveConfirmation = false
     @State private var showError = false
     @State private var errorMessage = ""
-    
-    // Progress tracking
     @State private var completedSteps: Set<String> = []
     @State private var completedStepActions: Set<StepActionIdentifier> = []
     @State private var hasUnsavedChanges = false
+    let tutorialDetailView: TutorialDetailView
     
     private func findLessonProgress(for lessonId: String) -> CategoryLessonProgress? {
-            guard let user = authService.currentUser else { return nil }
-            return user.progress.smartphoneBasics.first { $0.lessonId == lessonId }
-        }
+        guard let user = authService.currentUser else { return nil }
+        return user.progress.smartphoneBasics.first { $0.lessonId == lessonId }
+    }
     
-    init(lesson: Lesson, progress: CategoryLessonProgress? = nil, userId: String) {
+    init(lesson: Lesson, progress: CategoryLessonProgress? = nil, userId: String, tutorialDetailView: TutorialDetailView) {
             self._lesson = State(initialValue: lesson)
             self._progress = State(initialValue: progress)
             self.userId = userId
             self._viewModel = StateObject(wrappedValue: TutorialViewModel(userId: userId))
+            self.tutorialDetailView = tutorialDetailView
+        }
+    
+    private func saveProgress() async {
+            do {
+                viewModel.tutorialDetailView = tutorialDetailView
+                try await viewModel.updateBatchProgress(
+                    category: "smartphoneBasics",
+                    lessonId: lesson.lessonId,
+                    completedSteps: Array(completedSteps),
+                    completedStepActions: completedStepActions
+                )
+                
+                await MainActor.run {
+                    hasUnsavedChanges = false
+                    showingSaveConfirmation = true
+                    progress = findLessonProgress(for: lesson.lessonId)
+                }
+            } 
+        catch {
+                // ... error handling ...
+            }
         }
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Video Section
-//                if let videoURL = lesson.videoUrl {
-                    Button {
-                        showingVideo = true
-                    } label: {
-                        ZStack {
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(height: 200)
-                            
-                            Image(systemName: "play.circle.fill")
-                                .font(.system(size: 50))
-                                .foregroundColor(.blue)
-                        }
-                        .cornerRadius(12)
-                    }
-//                }
-                
-                
-                if let progress = progress {
-                    VStack(alignment: .leading, spacing: 8) {
-                        if progress.completed {
-                            Label("Lesson Completed", systemImage: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                        }
+                Button {
+                    showingVideo = true
+                } label: {
+                    ZStack {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(height: 200)
                         
-                        Text("Last accessed: \(progress.lastAccessed.formatted())")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        ForEach(progress.stepProgress) { stepProgress in
-                            if let step = lesson.steps.first(where: { $0.stepId == stepProgress.stepId }) {
-                                VStack(alignment: .leading) {
-                                    Text(step.title)
-                                        .font(.headline)
-                                    
-                                    ForEach(step.actionItems.filter { item in
-                                        stepProgress.completedActionItems.contains(item.itemId)
-                                    }) { item in
-                                        Text("✓ \(item.task)")
-                                            .foregroundColor(.green)
-                                    }
-                                }
-                            }
-                        }
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.blue)
                     }
-                    .padding()
-                    .background(Color(.systemBackground))
                     .cornerRadius(12)
                 }
+                
+                if let currentProgress = progress {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        if currentProgress.completed {
+                                            Label("Lesson Completed", systemImage: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                        }
+                                        
+                                        Text("Last accessed: \(currentProgress.lastAccessed.formatted())")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        
+                                        ForEach(currentProgress.stepProgress) { stepProgress in
+                                            if let step = lesson.steps.first(where: { $0.stepId == stepProgress.stepId }) {
+                                                VStack(alignment: .leading) {
+                                                    Text(step.title)
+                                                        .font(.headline)
+                                                    
+                                                    ForEach(step.actionItems.filter { item in
+                                                        stepProgress.completedActionItems.contains(item.itemId)
+                                                    }) { item in
+                                                        Text("✓ \(item.task)")
+                                                            .foregroundColor(.green)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding()
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(12)
+                                }
                 
                 // Steps Section
                 ForEach(lesson.steps) { step in
@@ -335,11 +347,12 @@ struct LessonDetailView: View {
                             
                             if completedStepActions.contains(identifier) {
                                 completedStepActions.remove(identifier)
+                                print("Removed action: \(identifier)")
                             } else {
                                 completedStepActions.insert(identifier)
+                                print("Added action: \(identifier)")
                             }
                             
-                            // Check if step is completed
                             let stepCompleted = step.actionItems
                                 .filter { $0.isRequired }
                                 .allSatisfy { actionItem in
@@ -353,8 +366,10 @@ struct LessonDetailView: View {
                             
                             if stepCompleted {
                                 completedSteps.insert(step.stepId)
+                                print("Completed step: \(step.stepId)")
                             } else {
                                 completedSteps.remove(step.stepId)
+                                print("Uncompleted step: \(step.stepId)")
                             }
                             
                             hasUnsavedChanges = true
@@ -364,31 +379,12 @@ struct LessonDetailView: View {
                         currentStepId: step.stepId
                     )
                 }
-                                
                 
                 // Save Progress Button
                 if hasUnsavedChanges {
                     Button {
                         Task {
-                            do {
-                                try await viewModel.updateBatchProgress(
-                                    category: "smartphoneBasics",
-                                    lessonId: lesson.lessonId,
-                                    completedSteps: Array(completedSteps),
-                                    completedStepActions: completedStepActions
-                                )
-                                hasUnsavedChanges = false
-                                showingSaveConfirmation = true
-                                
-                                // Refresh user data
-//                                try await authService.refreshUserData()
-                                
-                                // Update local progress
-                                progress = findLessonProgress(for: lesson.lessonId)
-                            } catch {
-                                errorMessage = "Failed to save progress: \(error.localizedDescription)"
-                                showError = true
-                            }
+                            await saveProgress()
                         }
                     } label: {
                         HStack {
@@ -406,32 +402,32 @@ struct LessonDetailView: View {
                 
                 // Action Buttons
                 HStack {
-                   Button {
-                       Task {
-                           do {
-                               try await viewModel.saveForLater(lesson)
-                               showingSaveConfirmation = true
-                           } catch {
-                               errorMessage = "Failed to save for later: \(error.localizedDescription)"
-                               showError = true
-                           }
-                       }
-                   } label: {
-                       Label(
-                           lesson.savedForLater ? "Saved" : "Save for Later",
-                           systemImage: lesson.savedForLater ? "bookmark.fill" : "bookmark"
-                       )
-                   }
-                   
-                   Spacer()
-                   
-                   Button {
-                       showingMentorRequest = true
-                   } label: {
-                       Label("Request Help", systemImage: "person.fill.questionmark")
-                   }
-               }
-                           .padding()
+                    Button {
+                        Task {
+                            do {
+                                try await viewModel.saveForLater(lesson)
+                                showingSaveConfirmation = true
+                            } catch {
+                                errorMessage = "Failed to save for later: \(error.localizedDescription)"
+                                showError = true
+                            }
+                        }
+                    } label: {
+                        Label(
+                            lesson.savedForLater ? "Saved" : "Save for Later",
+                            systemImage: lesson.savedForLater ? "bookmark.fill" : "bookmark"
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        showingMentorRequest = true
+                    } label: {
+                        Label("Request Help", systemImage: "person.fill.questionmark")
+                    }
+                }
+                .padding()
             }
             .padding()
         }
@@ -451,17 +447,18 @@ struct LessonDetailView: View {
                     }
                 }
             }
-        }.alert("Error", isPresented: $showError) {
+        }
+        .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
-        }.onAppear {
-            // Initialize from saved progress
-            if let progress = progress {
-                completedSteps = Set(progress.completedSteps)
-                
-                // Create step-action identifiers from step progress
-                let stepActions = progress.stepProgress.flatMap { stepProgress in
+        }
+        .onAppear {
+            // Initialize from current progress
+            if let currentProgress = progress {
+                print("Initializing from current progress: \(currentProgress)")
+                completedSteps = Set(currentProgress.completedSteps)
+                let stepActions = currentProgress.stepProgress.flatMap { stepProgress in
                     stepProgress.completedActionItems.map { actionId in
                         StepActionIdentifier(
                             stepId: stepProgress.stepId,
@@ -473,7 +470,6 @@ struct LessonDetailView: View {
             }
         }
     }
-    
 }
 
 struct CategoryHeaderView: View {

@@ -106,12 +106,6 @@ struct BatchProgressRequest: Codable {
     }
 }
 
-//struct OverallProgress: Codable {
-//    let totalLessonsCompleted: Int
-//    let averageQuizScore: Double
-//    let lastActivityDate: Date
-//}
-
 enum NetworkError: Error {
     case invalidURL
     case invalidResponse

@@ -15,6 +15,8 @@ class TutorialViewModel: ObservableObject {
     @Published var currentStep: Int = 0
     @Published var lessons: [Lesson] = []
     @Published var isLoading = false
+    @Published var lessonProgress: CategoryLessonProgress?
+    var tutorialDetailView: TutorialDetailView?
     
     private let userId: String
     
@@ -23,42 +25,58 @@ class TutorialViewModel: ObservableObject {
     }
     
     func updateBatchProgress(
-        category: String,
-        lessonId: String,
-        completedSteps: [String],
-        completedStepActions: Set<StepActionIdentifier>
-    ) async throws {
-        // Group completed actions by step
-        let stepActionsDict = Dictionary(grouping: completedStepActions) { $0.stepId }
-        let stepActions = stepActionsDict.map { stepId, identifiers in
-            BatchProgressRequest.StepAction(
-                stepId: stepId,
-                actionItems: identifiers.map { $0.actionItemId }
+            category: String,
+            lessonId: String,
+            completedSteps: [String],
+            completedStepActions: Set<StepActionIdentifier>
+        ) async throws {
+            let progress = BatchProgressRequest(
+                category: category,
+                lessonId: lessonId,
+                completedSteps: completedSteps,
+                stepActions: makeStepActions(from: completedStepActions),
+                savedForLater: nil,
+                needsMentorHelp: nil,
+                mentorNotes: nil
             )
+            
+            let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/batch")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            let encoder = JSONEncoder()
+            request.httpBody = try encoder.encode(progress)
+            
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
+            
+            // Update local progress state first
+            await MainActor.run {
+                self.lessonProgress = response.progress
+            }
+            
+            // Refresh parent view data
+            guard let parentView = tutorialDetailView else {
+                print("Parent view reference is missing")
+                return
+            }
+            try await parentView.refreshData()
+            
+            // After parent refresh, update our local progress again
+            try await fetchLessonProgress(lessonId: lessonId)
+        }
+    
+    private func makeStepActions(from actions: Set<StepActionIdentifier>) -> [BatchProgressRequest.StepAction] {
+            return Dictionary(grouping: actions) { $0.stepId }
+                .map { stepId, identifiers in
+                    BatchProgressRequest.StepAction(
+                        stepId: stepId,
+                        actionItems: identifiers.map { $0.actionItemId }
+                    )
+                }
         }
         
-        let progress = BatchProgressRequest(
-            category: category,
-            lessonId: lessonId,
-            completedSteps: completedSteps,
-            stepActions: stepActions,
-            savedForLater: nil,
-            needsMentorHelp: nil,
-            mentorNotes: nil
-        )
-        
-        let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/batch")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let encoder = JSONEncoder()
-        request.httpBody = try encoder.encode(progress)
-        
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
-        debugPrint("Progress updated:", response)
-    }
     
     func saveForLater(_ lesson: Lesson) async throws {
         let progress = BatchProgressRequest(
@@ -107,6 +125,16 @@ class TutorialViewModel: ObservableObject {
         let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
         debugPrint("Mentor help requested:", response)
     }
+    
+    func fetchLessonProgress(lessonId: String) async throws {
+            let url = URL(string: "\(baseURL)/api/users/\(userId)/lessons/\(lessonId)/progress")!
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let progress = try JSONDecoder.authDecoder.decode(CategoryLessonProgress.self, from: data)
+            
+            await MainActor.run {
+                self.lessonProgress = progress
+            }
+        }
 }
 
 extension JSONDecoder {

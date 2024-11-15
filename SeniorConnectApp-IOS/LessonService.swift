@@ -15,11 +15,10 @@ class LessonService: ObservableObject {
         error = nil
         
         do {
-            async let lessonsTask = fetchLessonsFromAPI(category: category)
-            async let progressTask = fetchUserProgress(userId: userId, category: category)
+            let progressResponse = try await fetchUserProgress(userId: userId, category: category)
+            let lessons = try await fetchLessonsFromAPI(category: category)
             
-            let (lessons, progressResponse) = try await (lessonsTask, progressTask)
-            
+            // Update all state together
             self.lessons = lessons
             self.lessonsProgress = Dictionary(
                 uniqueKeysWithValues: progressResponse.categoryProgress.map {
@@ -27,13 +26,14 @@ class LessonService: ObservableObject {
                 }
             )
             self.overallProgress = progressResponse.overallProgress
-            self.isLoading = false
             
+            print("Updated lessonsProgress: \(self.lessonsProgress)")
         } catch {
             self.error = error
-            self.isLoading = false
             throw error
         }
+        self.isLoading = false
+        
     }
         
     private func fetchLessonsFromAPI(category: String) async throws -> [Lesson] {
