@@ -72,7 +72,7 @@ class AuthService: ObservableObject {
     }
     
     func signup(credentials: SignupCredentials) async throws -> AuthUser {
-            guard let url = URL(string: "\(baseURL)/api/users") else {
+            guard let url = URL(string: "\(baseURL)/api/users/signup") else {
                 throw AuthError.networkError
             }
             
