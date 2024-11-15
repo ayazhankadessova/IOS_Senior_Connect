@@ -9,14 +9,35 @@ class LessonService: ObservableObject {
     
     private let baseURL = "http://localhost:3000"
     
+    private func convertDisplayNameToApiName(_ displayName: String) -> String {
+        switch displayName {
+        case "Smartphone Basics":
+            return "smartphoneBasics"
+        case "Digital Literacy":
+            return "digitalLiteracy"
+        case "Social Media":
+            return "socialMedia"
+        case "Smart Home":
+            return "iot"
+        default:
+            return displayName.replacingOccurrences(of: " ", with: "")
+        }
+    }
+    
     @MainActor
     func fetchLessons(category: String, userId: String) async throws {
         isLoading = true
         error = nil
         
+//        if category == "Smartphone Basics" -> change to smartphoneBasics 
+        
         do {
-            let progressResponse = try await fetchUserProgress(userId: userId, category: category)
-            let lessons = try await fetchLessonsFromAPI(category: category)
+            
+            let apiCategoryName = convertDisplayNameToApiName(category)
+            print("Fetching progress for category: \(apiCategoryName)")
+            
+            let progressResponse = try await fetchUserProgress(userId: userId, category: apiCategoryName)
+            let lessons = try await fetchLessonsFromAPI(category: apiCategoryName)
             
             // Update all state together
             self.lessons = lessons

@@ -179,6 +179,7 @@ struct ActionItem: Codable, Identifiable {
 struct TutorialCategory: Identifiable {
     let id = UUID()
     let name: String
+    let apiName: String // Add this
     let description: String
     let icon: String
     let color: Color
@@ -186,14 +187,16 @@ struct TutorialCategory: Identifiable {
     
     static let allCategories = [
         TutorialCategory(
-            name: "smartphoneBasics",
+            name: "Smartphone Basics",
+            apiName: "smartphoneBasics",
             description: "Learn essential smartphone operations",
             icon: "iphone",
             color: .blue,
             lessons: nil
         ),
         TutorialCategory(
-            name: "Internet Safety",
+            name: "Digital Literacy",
+            apiName: "digitalLiteracy",
             description: "Stay safe while browsing online",
             icon: "lock.shield",
             color: .green,
@@ -201,6 +204,7 @@ struct TutorialCategory: Identifiable {
         ),
         TutorialCategory(
             name: "Social Media",
+            apiName: "socialMedia",
             description: "Connect with friends and family",
             icon: "person.2",
             color: .purple,
@@ -208,6 +212,7 @@ struct TutorialCategory: Identifiable {
         ),
         TutorialCategory(
             name: "Smart Home",
+            apiName: "iot",
             description: "Control your smart home devices",
             icon: "homekit",
             color: .orange,
