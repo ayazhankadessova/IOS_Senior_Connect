@@ -469,6 +469,7 @@ struct LessonDetailView: View {
                                 showingSaveConfirmation = true
                             } catch {
                                 errorMessage = "Failed to save for later: \(error.localizedDescription)"
+                                print(lesson)
                                 showError = true
                             }
                         }

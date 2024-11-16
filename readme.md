@@ -35,6 +35,7 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 15 nov
 - [x] Refresh Updates
 - [ ] Dont show "u wanna see quick tutorial thing" every time 
+- [ ] do smth w events (start)
 
 The Senior Connect app aims to facilitate social connections and improve digital literacy among seniors aged 60 and above. The app will serve as a platform for community engagement, mentorship, and resource sharing.
 A calendar feature to promote workshops and activities for seniors. RSVP functionality allowing users to join events easily.

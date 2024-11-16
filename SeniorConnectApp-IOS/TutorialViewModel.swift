@@ -79,52 +79,83 @@ class TutorialViewModel: ObservableObject {
         
     
     func saveForLater(_ lesson: Lesson) async throws {
-        let progress = BatchProgressRequest(
-            category: "smartphoneBasics",
-            lessonId: lesson.lessonId,
-            completedSteps: [],
-            stepActions: [],
-            savedForLater: true,
-            needsMentorHelp: nil,
-            mentorNotes: nil
-        )
+        print("Saving lesson for later: \(lesson.lessonId)")
+        let requestData = [
+            "category": "smartphoneBasics",
+            "lessonId": lesson.lessonId
+        ]
         
-        let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/batch")!
+        let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/save-for-later")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         let encoder = JSONEncoder()
-        request.httpBody = try encoder.encode(progress)
+        request.httpBody = try encoder.encode(requestData)
         
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
-        debugPrint("Saved for later:", response)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Debug response
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Save for later response:", responseString)
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.serverError("Server returned status code \(httpResponse.statusCode)")
+        }
+        
+        let progressResponse = try JSONDecoder.authDecoder.decode(SaveForLaterResponse.self, from: data)
+        
+        // Update local progress if needed
+        await MainActor.run {
+            self.lessonProgress = progressResponse.progress
+        }
+        
     }
-    
+        
     func requestMentorHelp(for lesson: Lesson, notes: String? = nil) async throws {
-        let progress = BatchProgressRequest(
-            category: "smartphoneBasics",
-            lessonId: lesson.lessonId,
-            completedSteps: [],
-            stepActions: [],
-            savedForLater: nil,
-            needsMentorHelp: true,
-            mentorNotes: notes
-        )
-        
-        let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/batch")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let encoder = JSONEncoder()
-        request.httpBody = try encoder.encode(progress)
-        
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder.authDecoder.decode(ProgressResponse.self, from: data)
-        debugPrint("Mentor help requested:", response)
-    }
+            print("Requesting mentor help for lesson: \(lesson.lessonId)")
+            let requestData = [
+                "category": "smartphoneBasics",
+                "lessonId": lesson.lessonId,
+                "notes": notes
+            ] as [String : Any?]
+            
+            let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/request-mentor")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            let jsonData = try JSONSerialization.data(withJSONObject: requestData.compactMapValues { $0 })
+            request.httpBody = jsonData
+            
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            // Debug response
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Request mentor help response:", responseString)
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.invalidResponse
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                throw NetworkError.serverError("Server returned status code \(httpResponse.statusCode)")
+            }
+            
+            let progressResponse = try JSONDecoder.authDecoder.decode(MentorHelpResponse.self, from: data)
+            
+            // Update local progress if needed
+            await MainActor.run {
+                self.lessonProgress = progressResponse.progress
+            }
+            
+        }
     
     func fetchLessonProgress(lessonId: String) async throws {
             let url = URL(string: "\(baseURL)/api/users/\(userId)/lessons/\(lessonId)/progress")!
@@ -161,6 +192,15 @@ extension JSONDecoder {
         }
         return decoder
     }
+}
+
+// Add these response types
+struct SaveForLaterResponse: Codable {
+    let progress: CategoryLessonProgress
+}
+
+struct MentorHelpResponse: Codable {
+    let progress: CategoryLessonProgress
 }
 
 //struct ProgressResponse: Codable {
