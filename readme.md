@@ -36,7 +36,7 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - [x] Refresh Updates
 - [ ] Dont show "u wanna see quick tutorial thing" every time 
 
-16 Nov
+16-17 Nov
 - [ ] do smth w events (start)
 - [ ] Add Sample Events (10)
 - [ ] Try out CRUD Opers
@@ -46,7 +46,11 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - based on areas/region
 - language
 - categories for each
+- REGISTERED?
 
+18 nov
+- add toast when reg/unreg 
+- online/not check
 
 
 

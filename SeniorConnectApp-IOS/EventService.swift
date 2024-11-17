@@ -79,32 +79,57 @@ class EventService {
     }
     
     func registerForEvent(_ eventId: String, userId: String) async throws {
-        print("📝 Registering for event: \(eventId)")
-        
-        guard let url = URL(string: "\(baseURL)/events/\(eventId)/join") else {
-            throw NetworkError.invalidURL
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let body = ["userId": userId]
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let errorMessage = errorJson["error"] as? String {
-                print("🚫 Registration error: \(errorMessage)")
+            print("\n=== EVENT REGISTRATION START ===")
+            print("📝 Registering for event: \(eventId)")
+            print("👤 User ID: \(userId)")
+            
+            guard let url = URL(string: "\(baseURL)/events/\(eventId)/join") else {
+                print("❌ Invalid URL construction")
+                throw NetworkError.invalidURL
             }
-            throw NetworkError.invalidResponse
+            print("🌐 Registration URL: \(url.absoluteString)")
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            let body = ["userId": userId]
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            
+            print("📤 Request body: \(body)")
+            print("📤 Request headers: \(request.allHTTPHeaderFields ?? [:])")
+            
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("❌ Invalid response type received")
+                    throw NetworkError.invalidResponse
+                }
+                
+                print("📡 Response status code: \(httpResponse.statusCode)")
+                print("📡 Response headers: \(httpResponse.allHeaderFields)")
+                
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📥 Response data: \(responseString)")
+                }
+                
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let errorMessage = errorJson["error"] as? String {
+                        print("🚫 Server error: \(errorMessage)")
+                    }
+                    throw NetworkError.invalidResponse
+                }
+                
+                print("✅ Registration successful")
+            } catch {
+                print("❌ Registration failed with error: \(error.localizedDescription)")
+                throw error
+            }
+            
+            print("=== EVENT REGISTRATION END ===\n")
         }
-        
-        print("✅ Successfully registered for event")
-    }
     
     func unregisterFromEvent(_ eventId: String, userId: String) async throws {
         print("🗑 Unregistering from event: \(eventId)")

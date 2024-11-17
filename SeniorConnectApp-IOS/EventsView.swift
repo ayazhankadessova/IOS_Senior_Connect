@@ -10,57 +10,101 @@ import SwiftUI
 import SwiftData
 // MARK: - Events View
 struct EventsView: View {
-    @StateObject private var viewModel = EventViewModel()
+    @StateObject private var viewModel: EventViewModel
     @State private var searchText = ""
     @State private var selectedCategory: String?
     @State private var selectedCity: String?
     @State private var isOnlineOnly = false
+    @EnvironmentObject var authService: AuthService
+    
+    private var hasActiveFilters: Bool {
+        isOnlineOnly || selectedCategory != nil || selectedCity != nil
+    }
+    
+    init() {
+        self._viewModel = StateObject(wrappedValue: EventViewModel(authService: AuthService()))
+    }
+    
+    private func clearAllFilters() {
+        isOnlineOnly = false
+        selectedCategory = nil
+        selectedCity = nil
+        Task {
+            await viewModel.applyFilters(category: nil, isOnline: false, city: nil)
+        }
+    }
     
     var body: some View {
         NavigationStack {
-            VStack {
-                // Search and Filters
-                SearchBar(text: $searchText, onSubmit: {
-                    Task {
-                        await viewModel.searchEvents(query: searchText)
+            VStack(spacing: 12) {
+                // Search and Clear Filters Row
+                HStack {
+                    SearchBar(text: $searchText, onSubmit: {
+                        Task {
+                            await viewModel.searchEvents(query: searchText)
+                        }
+                    })
+                    
+                    if hasActiveFilters {
+                        Button(action: clearAllFilters) {
+                            Text("Clear")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.blue)
+                        }
+                        .padding(.trailing, 16)
                     }
-                })
+                }
                 
-                // Filters
+                // Filters Row
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
+                    HStack(spacing: 8) {
                         FilterChip(
                             title: "Online Only",
                             isSelected: isOnlineOnly,
                             action: { isOnlineOnly.toggle() }
                         )
                         
-//                        if let categories = viewModel.categories {
-//                            ForEach(categories, id: \.self) { category in
-//                                FilterChip(
-//                                    title: category,
-//                                    isSelected: selectedCategory == category,
-//                                    action: { selectedCategory = category }
-//                                )
-//                            }
-//                        }
+                        ForEach(viewModel.categories, id: \.self) { category in
+                            FilterChip(
+                                title: category,
+                                isSelected: selectedCategory == category,
+                                action: {
+                                    if selectedCategory == category {
+                                        selectedCategory = nil
+                                    } else {
+                                        selectedCategory = category
+                                    }
+                                }
+                            )
+                        }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 16)
                 }
                 
                 // Events List
                 if viewModel.isLoading {
+                    Spacer()
                     ProgressView()
+                    Spacer()
+                } else if viewModel.events.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Events", systemImage: "calendar.badge.exclamationmark")
+                    } description: {
+                        Text("There are no events matching your criteria.")
+                    }
                 } else {
                     List {
                         ForEach(viewModel.events) { event in
                             NavigationLink(destination: EventDetailView(event: event)) {
                                 EventRow(event: event)
                             }
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         }
                         
                         if viewModel.hasMoreEvents {
                             ProgressView()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                                 .onAppear {
                                     Task {
                                         await viewModel.loadMoreEvents()
@@ -68,21 +112,28 @@ struct EventsView: View {
                                 }
                         }
                     }
+                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Events")
-            .onChange(of: isOnlineOnly) { _ in
+            .onChange(of: isOnlineOnly) { oldValue, newValue in
                 Task {
-                    await viewModel.applyFilters()
+                    await viewModel.applyFilters(category: selectedCategory, isOnline: newValue)
                 }
             }
-            .onChange(of: selectedCategory) { _ in
+            .onChange(of: selectedCategory) { oldValue, newValue in
                 Task {
-                    await viewModel.applyFilters()
+                    await viewModel.applyFilters(category: newValue, isOnline: isOnlineOnly)
                 }
             }
             .refreshable {
                 await viewModel.refreshEvents()
+            }
+        }
+        .onAppear {
+            viewModel.updateAuthService(authService)
+            Task {
+                await viewModel.fetchEvents()
             }
         }
     }
@@ -90,40 +141,63 @@ struct EventsView: View {
 
 struct EventRow: View {
     let event: Event
-    @StateObject private var viewModel = EventViewModel()
+    @StateObject private var viewModel: EventDetailViewModel
+    @EnvironmentObject var authService: AuthService
+    
+    init(event: Event) {
+            self.event = event
+            // Initialize with empty AuthService, will be updated in onAppear
+            self._viewModel = StateObject(wrappedValue: EventDetailViewModel(event: event, authService: AuthService()))
+        }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(event.title)
-                .font(.system(size: 18, weight: .medium))
-            
-            HStack {
-                Image(systemName: "clock")
-                Text(event.date.formatted(date: .abbreviated, time: .shortened))
-            }
-            .font(.system(size: 16))
-            .foregroundColor(.secondary)
-            
-            Text(event.description)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(event.title)
+                    .font(.system(size: 18, weight: .medium))
+                
+                HStack {
+                    Image(systemName: "clock")
+                    Text(event.date.formatted(date: .abbreviated, time: .shortened))
+                }
                 .font(.system(size: 16))
-                .lineLimit(2)
-            
-            Button("Registered") {
-//                Task {
-//                    await viewModel.toggleEventRegistration(event)
-//                }
+                .foregroundColor(.secondary)
+                
+                Text(event.description)
+                    .font(.system(size: 16))
+                    .lineLimit(2)
+                
+                Button(viewModel.isRegistered ? "Registered" : "Register") {
+                    Task {
+                        if viewModel.isRegistered {
+                            await viewModel.unregisterFromEvent()
+                        } else {
+                            await viewModel.registerForEvent()
+                        }
+                    }
+                }
+                .buttonStyle(.bordered)
+                .tint(viewModel.isRegistered ? .green : .blue)
+                .padding(.top, 4)
             }
-            .buttonStyle(.bordered)
-            .tint(.green)
-            .padding(.top, 4)
+            .padding(.vertical, 8)
+            .onAppear {
+                viewModel.updateAuthService(authService) // Update the AuthService
+                Task {
+                    await viewModel.checkRegistrationStatus()
+                }
+            }
         }
-        .padding(.vertical, 8)
-    }
 }
 
 // MARK: - Upcoming Events Preview
 struct UpcomingEventsPreview: View {
-    @StateObject private var viewModel = EventViewModel()
+    @StateObject private var viewModel: EventViewModel
+    @EnvironmentObject var authService: AuthService
+    
+    // Add initializer
+    init() {
+        self._viewModel = StateObject(wrappedValue: EventViewModel(authService: AuthService()))
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -155,6 +229,9 @@ struct UpcomingEventsPreview: View {
         .shadow(radius: 2)
         .task {
             await viewModel.fetchUpcomingEvents()
+        }
+        .onAppear {
+            viewModel.updateAuthService(authService)
         }
     }
 }
@@ -192,12 +269,29 @@ class EventViewModel: ObservableObject {
     private var currentPage = 1
     private let limit = 10
     private var currentQuery = EventQuery()
+    private let eventService = EventService()
+    private var authService: AuthService
     
     let categories = ["educational", "social", "health", "technology", "entertainment", "other"]
-    private let eventService = EventService()
+    
+    init(authService: AuthService) {
+        self.authService = authService
+        Task {
+            await fetchEvents()
+        }
+    }
+    
+    func updateAuthService(_ newAuthService: AuthService) {
+        print("🔄 Updating AuthService in EventViewModel")
+        self.authService = newAuthService
+        Task {
+            await fetchEvents()
+        }
+    }
     
     @MainActor
     func fetchEvents() async {
+        print("📥 Fetching events...")
         isLoading = true
         currentPage = 1
         
@@ -205,7 +299,9 @@ class EventViewModel: ObservableObject {
             let response = try await eventService.fetchEvents(query: currentQuery)
             events = response.events
             hasMoreEvents = response.pagination.hasNextPage
+            print("✅ Successfully fetched \(events.count) events")
         } catch {
+            print("❌ Error fetching events: \(error.localizedDescription)")
             self.error = error
         }
         
@@ -214,8 +310,12 @@ class EventViewModel: ObservableObject {
     
     @MainActor
     func loadMoreEvents() async {
-        guard hasMoreEvents, !isLoading else { return }
+        guard hasMoreEvents, !isLoading else {
+            print("⚠️ Skip loading more: hasMoreEvents=\(hasMoreEvents), isLoading=\(isLoading)")
+            return
+        }
         
+        print("📥 Loading more events...")
         isLoading = true
         currentPage += 1
         currentQuery.page = currentPage
@@ -224,7 +324,9 @@ class EventViewModel: ObservableObject {
             let response = try await eventService.fetchEvents(query: currentQuery)
             events.append(contentsOf: response.events)
             hasMoreEvents = response.pagination.hasNextPage
+            print("✅ Successfully loaded \(response.events.count) more events")
         } catch {
+            print("❌ Error loading more events: \(error.localizedDescription)")
             self.error = error
             currentPage -= 1
         }
@@ -234,12 +336,14 @@ class EventViewModel: ObservableObject {
     
     @MainActor
     func searchEvents(query: String) async {
+        print("🔍 Searching events with query: \(query)")
         currentQuery.search = query
         await fetchEvents()
     }
     
     @MainActor
     func applyFilters(category: String? = nil, isOnline: Bool? = nil, city: String? = nil) async {
+        print("🔧 Applying filters - category: \(category ?? "nil"), isOnline: \(String(describing: isOnline)), city: \(city ?? "nil")")
         currentQuery.category = category
         currentQuery.isOnline = isOnline
         currentQuery.city = city
@@ -248,33 +352,63 @@ class EventViewModel: ObservableObject {
     
     @MainActor
     func refreshEvents() async {
+        print("🔄 Refreshing events...")
         currentPage = 1
         await fetchEvents()
     }
     
     @MainActor
     func fetchUpcomingEvents() async {
+        print("📅 Fetching upcoming events...")
         isLoading = true
         
         do {
             let query = EventQuery(limit: 3)
             let response = try await eventService.fetchEvents(query: query)
             upcomingEvents = response.events
+            print("✅ Successfully fetched \(upcomingEvents.count) upcoming events")
         } catch {
+            print("❌ Error fetching upcoming events: \(error.localizedDescription)")
             self.error = error
         }
         
         isLoading = false
+    }
+    
+    // Helper method to check if there are any events
+    var hasEvents: Bool {
+        !events.isEmpty
+    }
+    
+    // Helper method to check if there are any upcoming events
+    var hasUpcomingEvents: Bool {
+        !upcomingEvents.isEmpty
+    }
+    
+    // Helper method to get events count
+    var eventsCount: Int {
+        events.count
+    }
+    
+    // Helper method to get the current page number
+    var currentPageNumber: Int {
+        currentPage
+    }
+    
+    // Helper method to check if we're on the first page
+    var isFirstPage: Bool {
+        currentPage == 1
     }
 }
 
 struct EventDetailView: View {
     let event: Event
     @StateObject private var viewModel: EventDetailViewModel
+    @EnvironmentObject var authService: AuthService
     
     init(event: Event) {
         self.event = event
-        self._viewModel = StateObject(wrappedValue: EventDetailViewModel(event: event))
+        self._viewModel = StateObject(wrappedValue: EventDetailViewModel(event: event, authService: AuthService()))
     }
     
     var body: some View {
@@ -367,6 +501,12 @@ struct EventDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+                    // Update the viewModel's authService with the environment's authService
+                    if let viewModelAuthService = viewModel.authService as? AuthService {
+                        viewModelAuthService.currentUser = authService.currentUser
+                    }
+                }
         .toolbar {
             if !viewModel.isRegistered {
                 Button(action: {
@@ -400,30 +540,28 @@ struct SearchBar: View {
     let onSubmit: () -> Void
     
     var body: some View {
-        HStack {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                
-                TextField("Search events...", text: $text)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .onSubmit(onSubmit)
-                
-                if !text.isEmpty {
-                    Button(action: {
-                        text = ""
-                        onSubmit()
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                    }
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField("Search events...", text: $text)
+                .textFieldStyle(PlainTextFieldStyle())
+                .onSubmit(onSubmit)
+            
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                    onSubmit()
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
                 }
             }
-            .padding(8)
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
         }
-        .padding(.horizontal)
+        .padding(12)
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
+        .padding(.horizontal, 16)
     }
 }
 
@@ -435,13 +573,21 @@ struct FilterChip: View {
     
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.system(size: 14))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(isSelected ? Color.blue : Color(.systemGray6))
-                .foregroundColor(isSelected ? .white : .primary)
-                .cornerRadius(16)
+            HStack(spacing: 4) {
+                Text(title.capitalized)
+                    .font(.system(size: 14, weight: .medium))
+                
+                if isSelected {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(isSelected ? .white.opacity(0.9) : .gray)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isSelected ? Color.blue : Color(.systemGray6))
+            .foregroundColor(isSelected ? .white : .primary)
+            .cornerRadius(16)
         }
     }
 }
@@ -454,10 +600,13 @@ class EventDetailViewModel: ObservableObject {
     
     private let event: Event
     private let eventService: EventService
+    var authService: AuthService
     
-    init(event: Event) {
+    init(event: Event, authService: AuthService) {
+        print("🔄 EventDetailViewModel initialized for event: \(event.id)")
         self.event = event
         self.eventService = EventService()
+        self.authService = authService
         
         // Check registration status
         Task {
@@ -465,47 +614,103 @@ class EventDetailViewModel: ObservableObject {
         }
     }
     
+    // Add method to update AuthService
+    func updateAuthService(_ newAuthService: AuthService) {
+        print("🔄 Updating AuthService in EventDetailViewModel")
+        self.authService = newAuthService
+        // Recheck registration status with new auth service
+        Task {
+            await checkRegistrationStatus()
+        }
+    }
+    
     @MainActor
     func checkRegistrationStatus() async {
+        print("🔍 Checking registration status...")
         isLoading = true
         do {
-            if let userId = UserDefaults.standard.string(forKey: "userId") {
+            let userId = authService.currentUser?.id ?? ""
+            if !userId.isEmpty {
+                print("👤 Found userId from AuthService: \(userId)")
                 isRegistered = try await eventService.checkRegistrationStatus(
                     eventId: event.id,
                     userId: userId
                 )
+                print("✅ Registration status check complete. isRegistered: \(isRegistered)")
+            } else {
+                print("⚠️ No userId available from AuthService")
+                isRegistered = false
             }
         } catch {
+            print("❌ Error checking registration status: \(error.localizedDescription)")
             self.error = error
+            isRegistered = false
         }
         isLoading = false
     }
     
     @MainActor
     func registerForEvent() async {
+        print("📝 Starting event registration process...")
         isLoading = true
         do {
-            if let userId = UserDefaults.standard.string(forKey: "userId") {
+            let userId = authService.currentUser?.id ?? ""
+            if !userId.isEmpty {
+                print("📍 Registration attempt - Event ID: \(event.id), User ID: \(userId)")
                 try await eventService.registerForEvent(event.id, userId: userId)
                 isRegistered = true
+                print("✅ Registration successful")
+            } else {
+                print("⚠️ Registration failed - No userId available from AuthService")
+//                error = NetworkError.invalidRequest
+                return
             }
         } catch {
+            print("❌ Registration error: \(error.localizedDescription)")
             self.error = error
+            isRegistered = false
         }
         isLoading = false
+        print("🔄 Registration process completed. isRegistered: \(isRegistered)")
     }
     
     @MainActor
     func unregisterFromEvent() async {
+        print("🗑 Starting event unregistration process...")
         isLoading = true
         do {
-            if let userId = UserDefaults.standard.string(forKey: "userId") {
+            let userId = authService.currentUser?.id ?? ""
+            if !userId.isEmpty {
+                print("📍 Unregistration attempt - Event ID: \(event.id), User ID: \(userId)")
                 try await eventService.unregisterFromEvent(event.id, userId: userId)
                 isRegistered = false
+                print("✅ Unregistration successful")
+            } else {
+                print("⚠️ Unregistration failed - No userId available from AuthService")
+//                error = NetworkError.invalidRequest
+                return
             }
         } catch {
+            print("❌ Unregistration error: \(error.localizedDescription)")
             self.error = error
         }
         isLoading = false
+        print("🔄 Unregistration process completed. isRegistered: \(isRegistered)")
+    }
+    
+    // Helper method to get current registration status
+    var registrationStatus: Bool {
+        isRegistered
+    }
+    
+    // Helper method to check if the event is full
+    var isEventFull: Bool {
+        event.currentParticipants >= event.quota
+    }
+    
+    // Helper method to format remaining spots
+    var remainingSpots: String {
+        let remaining = event.quota - event.currentParticipants
+        return "\(remaining) spot\(remaining == 1 ? "" : "s") remaining"
     }
 }
