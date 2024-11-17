@@ -77,3 +77,32 @@ struct EventOrganizer: Codable {
         case volunteer
     }
 }
+
+struct EventQuery {
+    var page: Int = 1
+    var limit: Int = 10
+    var search: String?
+    var category: String?
+    var isOnline: Bool?
+    var city: String?
+    var startDate: Date?
+    var endDate: Date?
+}
+
+struct PaginatedResponse<T: Codable>: Codable {
+    let events: [T]
+    let pagination: Pagination
+}
+
+struct Pagination: Codable {
+    let currentPage: Int
+    let totalPages: Int
+    let totalEvents: Int
+    let hasNextPage: Bool
+    let hasPreviousPage: Bool
+}
+
+
+struct RegistrationResponse: Codable {
+    let isRegistered: Bool
+}

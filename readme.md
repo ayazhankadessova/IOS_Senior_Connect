@@ -45,6 +45,7 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - online/offline
 - based on areas/region
 - language
+- categories for each
 
 
 
