@@ -35,7 +35,14 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 15 nov
 - [x] Refresh Updates
 - [ ] Dont show "u wanna see quick tutorial thing" every time 
+
+16 Nov
 - [ ] do smth w events (start)
+- [ ] Add Sample Events (10)
+- [ ] Try out CRUD Opers
+- [ ] fix date on the backend
+
+
 
 The Senior Connect app aims to facilitate social connections and improve digital literacy among seniors aged 60 and above. The app will serve as a platform for community engagement, mentorship, and resource sharing.
 A calendar feature to promote workshops and activities for seniors. RSVP functionality allowing users to join events easily.
@@ -60,6 +67,7 @@ Backlog:
 - [ ] Make Detail View look good like in drafts
 - [ ] go thru the code, remove lengthy views!
 - [ ] Add image for vidoes, can we show them in the same page ?
+- [ ] Remove help requested and remove save for later (just change backebd) -> Easy 
 
 
 

@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftData
 // MARK: - Events View
 struct EventsView: View {
-    @Query private var events: [Event]
+    @StateObject private var viewModel = EventViewModel()
     @State private var selectedDate = Date()
     
     var body: some View {
@@ -25,9 +25,13 @@ struct EventsView: View {
                 .datePickerStyle(.graphical)
                 .padding()
                 
-                List {
-                    ForEach(filterEvents(for: selectedDate)) { event in
-                        EventRow(event: event)
+                if viewModel.isLoading {
+                    ProgressView()
+                } else {
+                    List {
+                        ForEach(viewModel.filterEvents(for: selectedDate)) { event in
+                            EventRow(event: event)
+                        }
                     }
                 }
             }
@@ -38,17 +42,19 @@ struct EventsView: View {
                 }
                 .font(.system(size: 18))
             }
+            .task {
+                await viewModel.fetchEvents()
+            }
+            .refreshable {
+                await viewModel.fetchEvents()
+            }
         }
-    }
-    
-    private func filterEvents(for date: Date) -> [Event] {
-        // Filter events for selected date
-        return events
     }
 }
 
 struct EventRow: View {
     let event: Event
+    @StateObject private var viewModel = EventViewModel()
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -62,15 +68,17 @@ struct EventRow: View {
             .font(.system(size: 16))
             .foregroundColor(.secondary)
             
-            Text(event.desc)
+            Text(event.description)
                 .font(.system(size: 16))
                 .lineLimit(2)
             
-            Button("RSVP") {
-                // Handle RSVP
+            Button("Registered") {
+                Task {
+                    await viewModel.toggleEventRegistration(event)
+                }
             }
             .buttonStyle(.bordered)
-            .tint(.blue)
+            .tint(.green)
             .padding(.top, 4)
         }
         .padding(.vertical, 8)
@@ -79,20 +87,22 @@ struct EventRow: View {
 
 // MARK: - Upcoming Events Preview
 struct UpcomingEventsPreview: View {
-    @Query private var events: [Event]
+    @StateObject private var viewModel = EventViewModel()
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Upcoming Events")
                 .font(.system(size: 20, weight: .bold))
             
-            if events.isEmpty {
+            if viewModel.isLoading {
+                ProgressView()
+            } else if viewModel.upcomingEvents.isEmpty {
                 Text("No upcoming events")
                     .font(.system(size: 16))
                     .foregroundColor(.secondary)
                     .padding()
             } else {
-                ForEach(Array(events.prefix(3))) { event in
+                ForEach(viewModel.upcomingEvents.prefix(3)) { event in
                     EventPreviewRow(event: event)
                 }
             }
@@ -107,6 +117,9 @@ struct UpcomingEventsPreview: View {
         .background(Color(.systemBackground))
         .cornerRadius(15)
         .shadow(radius: 2)
+        .task {
+            await viewModel.fetchUpcomingEvents()
+        }
     }
 }
 
@@ -130,5 +143,61 @@ struct EventPreviewRow: View {
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 8)
+    }
+}
+
+class EventViewModel: ObservableObject {
+    @Published private(set) var events: [Event] = []
+    @Published private(set) var upcomingEvents: [Event] = []
+    @Published private(set) var isLoading = false
+    @Published var error: Error?
+    
+    private let eventService = EventService()
+    
+    @MainActor
+    func fetchEvents() async {
+        isLoading = true
+        
+        do {
+            events = try await eventService.fetchEvents()
+            print(events)
+        } catch {
+            self.error = error
+        }
+        
+        isLoading = false
+    }
+    
+    @MainActor
+    func fetchUpcomingEvents() async {
+        isLoading = true
+        
+        do {
+            upcomingEvents = try await eventService.fetchUpcomingEvents()
+        } catch {
+            self.error = error
+        }
+        
+        isLoading = false
+    }
+    
+    func filterEvents(for date: Date) -> [Event] {
+        // Implement date filtering logic
+        print(events)
+        return events
+//        return events.filter { Calendar.current.isDate($0.date, inSameDayAs: date) }
+    }
+    
+    func toggleEventRegistration(_ event: Event) async {
+        do {
+            if true {
+                try await eventService.unregisterFromEvent(event.id)
+            } else {
+                try await eventService.registerForEvent(event.id)
+            }
+            await fetchEvents() // Refresh events list
+        } catch {
+            self.error = error
+        }
     }
 }

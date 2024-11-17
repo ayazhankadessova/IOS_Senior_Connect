@@ -28,6 +28,8 @@
 		BC0F9EDD2CE4EE700016DD1C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */; };
 		BC0F9EDF2CE4EF150016DD1C /* TutorialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */; };
 		BCFB77362CE73292000E3574 /* drafts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB77352CE73292000E3574 /* drafts.swift */; };
+		BCFB801E2CE84962000E3574 /* EventModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB801D2CE84962000E3574 /* EventModels.swift */; };
+		BCFB80202CE84999000E3574 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB801F2CE84999000E3574 /* EventService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2008,6 +2010,8 @@
 		BCFB80192CE73E72000E3574 /* package.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
 		BCFB801A2CE73E72000E3574 /* server.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = server.js; sourceTree = "<group>"; };
 		BCFB801B2CE73E72000E3574 /* vercel.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vercel.json; sourceTree = "<group>"; };
+		BCFB801D2CE84962000E3574 /* EventModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventModels.swift; sourceTree = "<group>"; };
+		BCFB801F2CE84999000E3574 /* EventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2077,6 +2081,7 @@
 				BC0F9EDC2CE4EE700016DD1C /* Helpers.swift */,
 				BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */,
 				BCFB77352CE73292000E3574 /* drafts.swift */,
+				BCFB801F2CE84999000E3574 /* EventService.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -2112,6 +2117,7 @@
 			children = (
 				BC0F9ECA2CE4874D0016DD1C /* AuthModels.swift */,
 				BC0F9ED82CE4ECE10016DD1C /* LessonModels.swift */,
+				BCFB801D2CE84962000E3574 /* EventModels.swift */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -6934,8 +6940,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCFB80202CE84999000E3574 /* EventService.swift in Sources */,
 				BC0F9E9C2CE486CB0016DD1C /* ContentView.swift in Sources */,
 				BC0F9ED92CE4ECE20016DD1C /* LessonModels.swift in Sources */,
+				BCFB801E2CE84962000E3574 /* EventModels.swift in Sources */,
 				BC0F9ECB2CE4874D0016DD1C /* AuthModels.swift in Sources */,
 				BC0F9EC72CE487270016DD1C /* AuthenticationManager.swift in Sources */,
 				BC0F9EDF2CE4EF150016DD1C /* TutorialViewModel.swift in Sources */,

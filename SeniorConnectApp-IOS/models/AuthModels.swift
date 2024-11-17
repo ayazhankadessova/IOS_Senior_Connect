@@ -6,6 +6,7 @@ struct AuthUser: Codable {
     let email: String
     let progress: UserProgress
     let overallProgress: OverallProgress
+    let registeredEvents: [String]  // Add registeredEvents array
     let v: Int
     
     enum CodingKeys: String, CodingKey {
@@ -14,6 +15,7 @@ struct AuthUser: Codable {
         case email
         case progress
         case overallProgress
+        case registeredEvents
         case v = "__v"
     }
 }
@@ -43,6 +45,7 @@ struct SignupResponse: Codable {
     let email: String
     let progress: UserProgress
     let overallProgress: OverallProgress
+    let registeredEvents: [String]  // Add registeredEvents array
     let id: String
     let v: Int
     
@@ -51,6 +54,7 @@ struct SignupResponse: Codable {
         case email
         case progress
         case overallProgress
+        case registeredEvents
         case id = "_id"
         case v = "__v"
     }
