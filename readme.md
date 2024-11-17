@@ -41,6 +41,11 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - [ ] Add Sample Events (10)
 - [ ] Try out CRUD Opers
 - [ ] fix date on the backend
+- [ ] reg/unreg
+- online/offline
+- based on areas/region
+- language
+
 
 
 

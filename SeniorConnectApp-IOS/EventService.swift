@@ -12,82 +12,72 @@ class EventService {
     private let baseURL = "http://localhost:3000/api"
     
     func fetchEvents() async throws -> [Event] {
-            print("📅 Fetching events...")
-            
-            guard let url = URL(string: "\(baseURL)/events") else {
-                print("❌ Invalid URL: \(baseURL)/events")
-                throw NetworkError.invalidURL
-            }
-            
-            print("🔍 Making request to: \(url.absoluteString)")
-            
-            do {
-                let (data, response) = try await URLSession.shared.data(from: url)
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    print("❌ Invalid response type")
-                    throw NetworkError.invalidResponse
-                }
-                
-                print("📡 Response status code: \(httpResponse.statusCode)")
-                
-                guard (200...299).contains(httpResponse.statusCode) else {
-                    print("❌ Error status code: \(httpResponse.statusCode)")
-                    throw NetworkError.invalidResponse
-                }
-                
-                // Debug: Print raw response
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("📦 Raw response data: \(jsonString)")
-                }
-                
-                let decoder = JSONDecoder()
-                
-                // Custom date decoding strategy
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-                formatter.locale = Locale(identifier: "en_US_POSIX")
-                formatter.timeZone = TimeZone(secondsFromGMT: 0)
-                
-                decoder.dateDecodingStrategy = .custom { decoder -> Date in
-                    let container = try decoder.singleValueContainer()
-                    let dateString = try container.decode(String.self)
-                    
-                    if let date = formatter.date(from: dateString) {
-                        return date
-                    }
-                    
-                    // Try alternative formats if the first one fails
-                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                    if let date = formatter.date(from: dateString) {
-                        return date
-                    }
-                    
-                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-                    if let date = formatter.date(from: dateString) {
-                        return date
-                    }
-                    
-                    print("❌ Failed to parse date: \(dateString)")
-                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
-                }
-                
-                let events = try decoder.decode([Event].self, from: data)
-                print("✅ Successfully fetched \(events.count) events")
-                
-                // Log first event as sample
-                if let firstEvent = events.first {
-                    print("📋 Sample event: \(firstEvent.title)")
-                    print("📅 Event date: \(firstEvent.date)")
-                    print("🕒 Event times: \(firstEvent.startTime) - \(firstEvent.endTime)")
-                }
-                
-                return events
-            } catch {
-                print("❌ Error fetching events: \(error)")
-                throw error
-            }
+        print("📅 Fetching events...")
+        
+        guard let url = URL(string: "\(baseURL)/events") else {
+            print("❌ Invalid URL: \(baseURL)/events")
+            throw NetworkError.invalidURL
         }
+        
+        print("🔍 Making request to: \(url.absoluteString)")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Invalid response type")
+                throw NetworkError.invalidResponse
+            }
+            
+            print("📡 Response status code: \(httpResponse.statusCode)")
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                print("❌ Error status code: \(httpResponse.statusCode)")
+                
+                // Try to parse error message if available
+                if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let errorMessage = errorJson["error"] as? String {
+                    print("🚫 Server error: \(errorMessage)")
+                }
+                
+                throw NetworkError.invalidResponse
+            }
+            
+            // Debug: Print raw response
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📦 Raw response data: \(jsonString)")
+            }
+            
+            let events = try JSONDecoder.authDecoder.decode([Event].self, from: data)
+            print("✅ Successfully fetched \(events.count) events")
+            
+            // Log first event as sample
+            if let firstEvent = events.first {
+                print("📋 Sample event: \(firstEvent.title), Date: \(firstEvent.date)")
+            }
+            
+            return events
+        } catch let DecodingError.dataCorrupted(context) {
+            print("❌ Data corrupted: \(context.debugDescription)")
+            print("   - Coding path: \(context.codingPath)")
+            throw NetworkError.decodingError
+        } catch let DecodingError.keyNotFound(key, context) {
+            print("❌ Key '\(key.stringValue)' not found: \(context.debugDescription)")
+            print("   - Coding path: \(context.codingPath)")
+            throw NetworkError.decodingError
+        } catch let DecodingError.typeMismatch(type, context) {
+            print("❌ Type mismatch for type \(type): \(context.debugDescription)")
+            print("   - Coding path: \(context.codingPath)")
+            throw NetworkError.decodingError
+        } catch let DecodingError.valueNotFound(type, context) {
+            print("❌ Value of type \(type) not found: \(context.debugDescription)")
+            print("   - Coding path: \(context.codingPath)")
+            throw NetworkError.decodingError
+        } catch {
+            print("❌ Network error: \(error.localizedDescription)")
+            throw error
+        }
+    }
     
     func fetchUpcomingEvents() async throws -> [Event] {
         guard let url = URL(string: "\(baseURL)/events?status=upcoming") else {
