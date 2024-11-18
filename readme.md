@@ -51,6 +51,15 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 18 nov
 - add toast when reg/unreg 
 - online/not check
+- [x] add video url
+- [x] Add lessons
+- [x] Add image to every event -> now it is just random
+- [ ] check lessons
+- [ ] filter by category
+- [ ] tab that shows registered events
+- [ ] put events code to diff folders for better readability
+
+- work on Gitroll stuff
 
 
 
@@ -78,6 +87,7 @@ Backlog:
 - [ ] go thru the code, remove lengthy views!
 - [ ] Add image for vidoes, can we show them in the same page ?
 - [ ] Remove help requested and remove save for later (just change backebd) -> Easy 
+
 
 
 

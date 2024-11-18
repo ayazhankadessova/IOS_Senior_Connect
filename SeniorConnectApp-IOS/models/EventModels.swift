@@ -21,7 +21,7 @@ struct Event: Identifiable, Codable {
     let currentParticipants: Int
     let participants: [String]
     let status: EventStatus
-    let imageUrl: String?
+    let imageUrl: String
     let isOnline: Bool
     let meetingLink: String?
     let tags: [String]

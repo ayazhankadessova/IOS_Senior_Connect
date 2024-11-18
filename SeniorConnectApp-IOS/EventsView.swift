@@ -414,55 +414,106 @@ struct EventDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Event Image or Banner
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 200)
-                    .overlay(
-                        Text(event.isOnline ? "Online Event" : "In-Person Event")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.black.opacity(0.5))
-                    )
+                // Event Image with Overlay
+                AsyncImage(url: URL(string: event.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 200)
+                        .clipped()
+                        .overlay(
+                            VStack {
+                                Spacer()
+                                HStack {
+                                    Text(event.isOnline ? "Online Event" : "In-Person Event")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.black.opacity(0.6))
+                                        .cornerRadius(20)
+                                    Spacer()
+                                }
+                                .padding()
+                            }
+                        )
+                } placeholder: {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 200)
+                        .overlay(
+                            ProgressView()
+                                .tint(.gray)
+                        )
+                }
                 
                 VStack(alignment: .leading, spacing: 16) {
-                    // Title and Date
-                    Text(event.title)
-                        .font(.title)
-                        .fontWeight(.bold)
+                    // Category Tag
+                    Text(event.category.rawValue.capitalized)
+                        .font(.system(size: 12, weight: .medium))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(categoryColor(for: event.category).opacity(0.1))
+                        .foregroundColor(categoryColor(for: event.category))
+                        .cornerRadius(12)
                     
-                    // Date and Time
-                    HStack {
-                        Image(systemName: "calendar")
-                        Text(event.date.formatted(date: .long, time: .omitted))
-                    }
-                    
-                    HStack {
-                        Image(systemName: "clock")
-                        Text("\(event.startTime) - \(event.endTime)")
-                    }
-                    
-                    // Location
-                    if !event.isOnline {
-                        HStack {
-                            Image(systemName: "location")
-                            VStack(alignment: .leading) {
-                                Text(event.location.address)
-                                if let city = event.location.city {
-                                    Text(city)
-                                        .foregroundColor(.secondary)
+                    if !event.tags.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(event.tags, id: \.self) { tag in
+                                    TagView(tag: tag)
                                 }
                             }
                         }
                     }
                     
+                    // Title and Date
+                    Text(event.title)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    // Date and Time
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "calendar")
+                                .foregroundColor(.secondary)
+                            Text(event.date.formatted(date: .long, time: .omitted))
+                        }
+                        
+                        HStack(spacing: 12) {
+                            Image(systemName: "clock")
+                                .foregroundColor(.secondary)
+                            Text("\(event.startTime) - \(event.endTime)")
+                        }
+                        
+                        // Location
+                        if !event.isOnline {
+                            HStack(spacing: 12) {
+                                Image(systemName: "location")
+                                    .foregroundColor(.secondary)
+                                VStack(alignment: .leading) {
+                                    Text(event.location.address)
+                                    if let city = event.location.city {
+                                        Text(city)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .font(.system(size: 16))
+                    
+                    Divider()
+                    
                     // Description
                     Text("About this event")
                         .font(.headline)
-                        .padding(.top)
                     
                     Text(event.description)
                         .foregroundColor(.secondary)
+                        .font(.system(size: 16))
+                    
+                    Divider()
                     
                     // Organizer Info
                     GroupBox {
@@ -475,38 +526,66 @@ struct EventDetailView: View {
                                     .font(.headline)
                             }
                             Spacer()
-                            Button("Contact") {
+                            Button(action: {
                                 // Handle contact action
+                                if let email = URL(string: "mailto:\(event.organizer.contact)") {
+                                    UIApplication.shared.open(email)
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "envelope")
+                                    Text("Contact")
+                                }
                             }
                             .buttonStyle(.bordered)
                         }
                     }
                     
-                    // Registration Status
-                    if viewModel.isRegistered {
-                        Label("You're registered!", systemImage: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                    // Registration Status and Capacity
+                    VStack(alignment: .leading, spacing: 8) {
+                        if viewModel.isRegistered {
+                            Label("You're registered!", systemImage: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        
+                        // Capacity bar
+                        VStack(alignment: .leading, spacing: 4) {
+                            ProgressView(
+                                value: Double(event.currentParticipants),
+                                total: Double(event.quota)
+                            )
+                            .tint(capacityColor(current: event.currentParticipants, total: event.quota))
+                            
+                            HStack {
+                                Text("\(event.currentParticipants)/\(event.quota) spots filled")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                Spacer()
+                                
+                                if event.currentParticipants >= event.quota {
+                                    Text("Fully Booked")
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                } else {
+                                    Text("\(event.quota - event.currentParticipants) spots left")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                }
+                            }
+                        }
                     }
-                    
-                    // Capacity
-                    ProgressView(
-                        value: Double(event.currentParticipants),
-                        total: Double(event.quota)
-                    )
-                    Text("\(event.currentParticipants)/\(event.quota) spots filled")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
                 .padding()
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-                    // Update the viewModel's authService with the environment's authService
-                    if let viewModelAuthService = viewModel.authService as? AuthService {
-                        viewModelAuthService.currentUser = authService.currentUser
-                    }
-                }
+            if let viewModelAuthService = viewModel.authService as? AuthService {
+                viewModelAuthService.currentUser = authService.currentUser
+            }
+        }
         .toolbar {
             if !viewModel.isRegistered {
                 Button(action: {
@@ -519,17 +598,50 @@ struct EventDetailView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal)
                         .padding(.vertical, 8)
-                        .background(Color.blue)
+                        .background(event.currentParticipants >= event.quota ? Color.gray : Color.blue)
                         .cornerRadius(8)
                 }
                 .disabled(event.currentParticipants >= event.quota)
             } else {
-                Button("Unregister") {
+                Button(action: {
                     Task {
                         await viewModel.unregisterFromEvent()
                     }
+                }) {
+                    Text("Unregister")
+                        .foregroundColor(.red)
                 }
             }
+        }
+    }
+    
+    // Helper function for category colors
+    private func categoryColor(for category: EventCategory) -> Color {
+            switch category {
+            case .technology:
+                return .blue
+            case .health:
+                return .green
+            case .social:
+                return .orange
+            case .entertainment:
+                return .purple
+            case .educational:
+                return .red
+            case .other:
+                return .gray
+            }
+        }
+    
+    // Helper function for capacity color
+    private func capacityColor(current: Int, total: Int) -> Color {
+        let ratio = Double(current) / Double(total)
+        if ratio >= 0.9 {
+            return .red
+        } else if ratio >= 0.7 {
+            return .orange
+        } else {
+            return .green
         }
     }
 }
@@ -624,7 +736,6 @@ class EventDetailViewModel: ObservableObject {
         }
     }
     
-    @MainActor
     func checkRegistrationStatus() async {
         print("🔍 Checking registration status...")
         isLoading = true

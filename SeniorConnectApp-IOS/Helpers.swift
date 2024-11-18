@@ -154,3 +154,17 @@ struct OverallProgressView: View {
         .shadow(radius: 1)
     }
 }
+
+struct TagView: View {
+    let tag: String
+    
+    var body: some View {
+        Text("#\(tag)")
+            .font(.system(size: 12, weight: .medium))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Color(.systemGray6))
+            .foregroundColor(.secondary)
+            .cornerRadius(8)
+    }
+}
