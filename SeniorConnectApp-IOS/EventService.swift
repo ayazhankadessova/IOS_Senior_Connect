@@ -241,4 +241,17 @@ class EventService {
         
         return try JSONDecoder.authDecoder.decode(Event.self, from: data)
     }
+    
+    func getRegisteredEvents(userId: String) async throws -> [Event] {
+            let url = URL(string: "\(baseURL)/events/registered?userId=\(userId)")!
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw NetworkError.invalidResponse
+            }
+            
+            let events = try JSONDecoder.authDecoder.decode([Event].self, from: data)
+            return events
+        }
 }

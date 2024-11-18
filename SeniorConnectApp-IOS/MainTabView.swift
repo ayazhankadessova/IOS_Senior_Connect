@@ -1,10 +1,3 @@
-//
-//  MainTabView.swift
-//  SeniorConnectApp
-//
-//  Created by Аяжан on 13/11/2024.
-//
-
 import Foundation
 import SwiftUI
 
@@ -27,6 +20,10 @@ struct MainTabView: View {
                     Label("Events", systemImage: "calendar")
                 }
             
+            MyProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
 //            MentorshipView()
 //                .tabItem {
 //                    Label("Mentors", systemImage: "person.2.fill")

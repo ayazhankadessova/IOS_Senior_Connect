@@ -128,7 +128,6 @@ struct EventsView: View {
             }
             .refreshable {
                 // Clear cache and fetch fresh data
-//                eventService.clearCache()
                 await viewModel.refreshEvents()
                 print("✅ Refresh completed")
             }
@@ -136,6 +135,7 @@ struct EventsView: View {
         .onAppear {
             Task { @MainActor in
                 viewModel.updateAuthService(authService)
+                await viewModel.fetchEvents()
             }
         }
     }
@@ -145,7 +145,6 @@ struct EventRow: View {
     let event: Event
     @StateObject private var viewModel: EventDetailViewModel
     @EnvironmentObject var authService: AuthService
-    @State private var hasCheckedStatus = false
     
     init(event: Event) {
         self.event = event
@@ -198,32 +197,10 @@ struct EventRow: View {
                     }
                 }
             }
-            
-            // TODO: Fix this!
-            // Registration Button
-//            if !hasCheckedStatus {
-//                ProgressView()
-//                    .padding(.top, 4)
-//            } else {
-//                Button(viewModel.isRegistered ? "Registered" : "Register") {
-//                    Task {
-//                        if viewModel.isRegistered {
-//                            await viewModel.unregisterFromEvent()
-//                        } else {
-//                            await viewModel.registerForEvent()
-//                        }
-//                    }
-//                }
-//                .buttonStyle(.bordered)
-//                .tint(viewModel.isRegistered ? .green : .blue)
-//                .padding(.top, 4)
-//            }
         }
         .padding(.vertical, 8)
         .onAppear {
             viewModel.updateAuthService(authService)
-            viewModel.checkRegistrationStatus()
-            hasCheckedStatus = true
         }
     }
     
@@ -280,18 +257,36 @@ class EventViewModel: ObservableObject {
     private var currentQuery = EventQuery()
     private let eventService = EventService()
     private var authService: AuthService
-    var upcomingEvents : [Event]
     
     let categories = ["educational", "social", "health", "technology", "entertainment", "other"]
+    var upcomingEvents : [Event]
     
     init(authService: AuthService) {
         self.authService = authService
-        self.upcomingEvents = []
+        upcomingEvents = []
     }
     
     @MainActor
     func updateAuthService(_ newAuthService: AuthService) {
         self.authService = newAuthService
+    }
+    
+    @MainActor
+    func fetchUpcomingEvents() async {
+        print("📅 Fetching upcoming events...")
+        isLoading = true
+        
+        do {
+            let query = EventQuery(limit: 3)
+            let response = try await eventService.fetchEvents(query: query)
+            upcomingEvents = response.events
+            print("✅ Successfully fetched \(upcomingEvents.count) upcoming events")
+        } catch {
+            print("❌ Error fetching upcoming events: \(error.localizedDescription)")
+            self.error = error
+        }
+        
+        isLoading = false
     }
     
     @MainActor
@@ -384,32 +379,9 @@ class EventViewModel: ObservableObject {
         isLoading = false
     }
     
-    @MainActor
-    func fetchUpcomingEvents() async {
-        print("📅 Fetching upcoming events...")
-        isLoading = true
-        
-        do {
-            let query = EventQuery(limit: 3)
-            let response = try await eventService.fetchEvents(query: query)
-            upcomingEvents = response.events
-            print("✅ Successfully fetched \(upcomingEvents.count) upcoming events")
-        } catch {
-            print("❌ Error fetching upcoming events: \(error.localizedDescription)")
-            self.error = error
-        }
-        
-        isLoading = false
-    }
-    
     // Helper method to check if there are any events
     var hasEvents: Bool {
         !events.isEmpty
-    }
-    
-    // Helper method to check if there are any upcoming events
-    var hasUpcomingEvents: Bool {
-        !upcomingEvents.isEmpty
     }
     
     // Helper method to get events count
@@ -434,6 +406,9 @@ struct EventDetailView: View {
     @EnvironmentObject var authService: AuthService
     @State private var hasCheckedStatus = false
     
+    @State private var showingAlert = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
     
     init(event: Event) {
         self.event = event
@@ -487,14 +462,14 @@ struct EventDetailView: View {
                         .cornerRadius(12)
                     
                     if !event.tags.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(event.tags, id: \.self) { tag in
-                                        TagView(tag: tag)
-                                    }
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(event.tags, id: \.self) { tag in
+                                    TagView(tag: tag)
                                 }
                             }
                         }
+                    }
                     
                     // Title and Date
                     Text(event.title)
@@ -620,7 +595,15 @@ struct EventDetailView: View {
                 if !viewModel.isRegistered {
                     Button(action: {
                         Task {
-                            await viewModel.registerForEvent()
+                            let success = await viewModel.registerForEvent()
+                            if success {
+                                alertTitle = "Success"
+                                alertMessage = "You have been registered for the event!"
+                            } else {
+                                alertTitle = "Error"
+                                alertMessage = "Registration failed. Please try again."
+                            }
+                            showingAlert = true
                         }
                     }) {
                         Text("Register")
@@ -635,7 +618,15 @@ struct EventDetailView: View {
                 } else {
                     Button(action: {
                         Task {
-                            await viewModel.unregisterFromEvent()
+                            let success = await viewModel.unregisterFromEvent()
+                            if success {
+                                alertTitle = "Success"
+                                alertMessage = "You have been unregistered from the event."
+                            } else {
+                                alertTitle = "Error"
+                                alertMessage = "Unregistration failed. Please try again."
+                            }
+                            showingAlert = true
                         }
                     }) {
                         Text("Unregister")
@@ -644,25 +635,30 @@ struct EventDetailView: View {
                 }
             }
         }
+        .alert(alertTitle, isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
     }
     
     // Helper function for category colors
     private func categoryColor(for category: EventCategory) -> Color {
-            switch category {
-            case .technology:
-                return .blue
-            case .health:
-                return .green
-            case .social:
-                return .orange
-            case .entertainment:
-                return .purple
-            case .educational:
-                return .red
-            case .other:
-                return .gray
-            }
+        switch category {
+        case .technology:
+            return .blue
+        case .health:
+            return .green
+        case .social:
+            return .orange
+        case .entertainment:
+            return .purple
+        case .educational:
+            return .red
+        case .other:
+            return .gray
         }
+    }
     
     // Helper function for capacity color
     private func capacityColor(current: Int, total: Int) -> Color {
@@ -752,16 +748,14 @@ class EventDetailViewModel: ObservableObject {
         self.event = event
         self.eventService = EventService()
         self.authService = authService
-        
-        // No need to call checkRegistrationStatus here
-        // It will be called when the view appears
     }
     
     func updateAuthService(_ newAuthService: AuthService) {
         print("🔄 Updating AuthService in EventDetailViewModel")
         self.authService = newAuthService
-        checkRegistrationStatus()
+//        checkRegistrationStatus()
     }
+
     
     func checkRegistrationStatus() {
         print("🔍 Checking registration status...")
@@ -775,7 +769,7 @@ class EventDetailViewModel: ObservableObject {
         }
     }
     
-    func registerForEvent() async {
+    func registerForEvent() async -> Bool {
         print("📝 Starting event registration process...")
         isLoading = true
         do {
@@ -785,20 +779,23 @@ class EventDetailViewModel: ObservableObject {
                 try await eventService.registerForEvent(event.id, userId: userId)
                 isRegistered = true
                 print("✅ Registration successful")
+                isLoading = false
+                return true
             } else {
                 print("⚠️ Registration failed - No userId available from AuthService")
-                return
+                isLoading = false
+                return false
             }
         } catch {
             print("❌ Registration error: \(error.localizedDescription)")
             self.error = error
             isRegistered = false
+            isLoading = false
+            return false
         }
-        isLoading = false
-        print("🔄 Registration process completed. isRegistered: \(isRegistered)")
     }
     
-    func unregisterFromEvent() async {
+    func unregisterFromEvent() async -> Bool {
         print("🗑 Starting event unregistration process...")
         isLoading = true
         do {
@@ -808,29 +805,20 @@ class EventDetailViewModel: ObservableObject {
                 try await eventService.unregisterFromEvent(event.id, userId: userId)
                 isRegistered = false
                 print("✅ Unregistration successful")
+                isLoading = false
+                return true
             } else {
                 print("⚠️ Unregistration failed - No userId available from AuthService")
-                return
+                isLoading = false
+                return false
             }
         } catch {
             print("❌ Unregistration error: \(error.localizedDescription)")
             self.error = error
+            isLoading = false
+            return false
         }
-        isLoading = false
-        print("🔄 Unregistration process completed. isRegistered: \(isRegistered)")
     }
     
-    // Helper computed properties
-    var registrationStatus: Bool {
-        isRegistered
-    }
     
-    var isEventFull: Bool {
-        event.currentParticipants >= event.quota
-    }
-    
-    var remainingSpots: String {
-        let remaining = event.quota - event.currentParticipants
-        return "\(remaining) spot\(remaining == 1 ? "" : "s") remaining"
-    }
 }

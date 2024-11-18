@@ -37,6 +37,13 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 nw_read_request_report [C3] Receive failed with error "Operation timed out"
 
 ```
+- When scroll events:
+```
+🔄 Updating AuthService in EventDetailViewModel
+🔄 Updating AuthService in EventDetailViewModel
+🔄 Updating AuthService in EventDetailViewModel
+🔄 Updating AuthService in EventDetailViewModel
+```
 
 ## Plan 
 

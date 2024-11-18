@@ -30,6 +30,7 @@
 		BCFB77362CE73292000E3574 /* drafts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB77352CE73292000E3574 /* drafts.swift */; };
 		BCFB801E2CE84962000E3574 /* EventModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB801D2CE84962000E3574 /* EventModels.swift */; };
 		BCFB80202CE84999000E3574 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB801F2CE84999000E3574 /* EventService.swift */; };
+		BCFB80222CEB3834000E3574 /* MyProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80212CEB3834000E3574 /* MyProfileView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2012,6 +2013,7 @@
 		BCFB801B2CE73E72000E3574 /* vercel.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vercel.json; sourceTree = "<group>"; };
 		BCFB801D2CE84962000E3574 /* EventModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventModels.swift; sourceTree = "<group>"; };
 		BCFB801F2CE84999000E3574 /* EventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventService.swift; sourceTree = "<group>"; };
+		BCFB80212CEB3834000E3574 /* MyProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2082,6 +2084,7 @@
 				BC0F9EDE2CE4EF150016DD1C /* TutorialViewModel.swift */,
 				BCFB77352CE73292000E3574 /* drafts.swift */,
 				BCFB801F2CE84999000E3574 /* EventService.swift */,
+				BCFB80212CEB3834000E3574 /* MyProfileView.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -6955,6 +6958,7 @@
 				BC0F9ECF2CE4876D0016DD1C /* LoginView.swift in Sources */,
 				BCFB77362CE73292000E3574 /* drafts.swift in Sources */,
 				BC0F9EDB2CE4ED710016DD1C /* EventsView.swift in Sources */,
+				BCFB80222CEB3834000E3574 /* MyProfileView.swift in Sources */,
 				BC0F9ECD2CE4875F0016DD1C /* AuthService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
