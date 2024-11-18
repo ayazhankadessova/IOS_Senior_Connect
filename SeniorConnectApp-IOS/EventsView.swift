@@ -127,13 +127,15 @@ struct EventsView: View {
                 }
             }
             .refreshable {
+                // Clear cache and fetch fresh data
+//                eventService.clearCache()
                 await viewModel.refreshEvents()
+                print("✅ Refresh completed")
             }
         }
         .onAppear {
-            viewModel.updateAuthService(authService)
-            Task {
-                await viewModel.fetchEvents()
+            Task { @MainActor in
+                viewModel.updateAuthService(authService)
             }
         }
     }
@@ -143,95 +145,103 @@ struct EventRow: View {
     let event: Event
     @StateObject private var viewModel: EventDetailViewModel
     @EnvironmentObject var authService: AuthService
+    @State private var hasCheckedStatus = false
     
     init(event: Event) {
-            self.event = event
-            // Initialize with empty AuthService, will be updated in onAppear
-            self._viewModel = StateObject(wrappedValue: EventDetailViewModel(event: event, authService: AuthService()))
-        }
+        self.event = event
+        self._viewModel = StateObject(wrappedValue: EventDetailViewModel(event: event, authService: AuthService()))
+    }
     
     var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Title and Category
             VStack(alignment: .leading, spacing: 8) {
                 Text(event.title)
                     .font(.system(size: 18, weight: .medium))
                 
-                HStack {
-                    Image(systemName: "clock")
-                    Text(event.date.formatted(date: .abbreviated, time: .shortened))
-                }
+                // Category Tag
+                Text(event.category.rawValue.capitalized)
+                    .font(.system(size: 12, weight: .medium))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(categoryColor(for: event.category).opacity(0.1))
+                    .foregroundColor(categoryColor(for: event.category))
+                    .cornerRadius(12)
+            }
+            
+            // Date
+            HStack {
+                Image(systemName: "clock")
+                Text(event.date.formatted(date: .abbreviated, time: .shortened))
+            }
+            .font(.system(size: 16))
+            .foregroundColor(.secondary)
+            
+            // Description
+            Text(event.description)
                 .font(.system(size: 16))
-                .foregroundColor(.secondary)
-                
-                Text(event.description)
-                    .font(.system(size: 16))
-                    .lineLimit(2)
-                
-                Button(viewModel.isRegistered ? "Registered" : "Register") {
-                    Task {
-                        if viewModel.isRegistered {
-                            await viewModel.unregisterFromEvent()
-                        } else {
-                            await viewModel.registerForEvent()
+                .lineLimit(2)
+            
+            // Tags
+            if !event.tags.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(event.tags, id: \.self) { tag in
+                            Text("#\(tag)")
+                                .font(.system(size: 12, weight: .medium))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(Color(.systemGray6))
+                                .foregroundColor(.secondary)
+                                .cornerRadius(8)
                         }
                     }
                 }
-                .buttonStyle(.bordered)
-                .tint(viewModel.isRegistered ? .green : .blue)
-                .padding(.top, 4)
-            }
-            .padding(.vertical, 8)
-            .onAppear {
-                viewModel.updateAuthService(authService) // Update the AuthService
-                Task {
-                    await viewModel.checkRegistrationStatus()
-                }
-            }
-        }
-}
-
-// MARK: - Upcoming Events Preview
-struct UpcomingEventsPreview: View {
-    @StateObject private var viewModel: EventViewModel
-    @EnvironmentObject var authService: AuthService
-    
-    // Add initializer
-    init() {
-        self._viewModel = StateObject(wrappedValue: EventViewModel(authService: AuthService()))
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Upcoming Events")
-                .font(.system(size: 20, weight: .bold))
-            
-            if viewModel.isLoading {
-                ProgressView()
-            } else if viewModel.upcomingEvents.isEmpty {
-                Text("No upcoming events")
-                    .font(.system(size: 16))
-                    .foregroundColor(.secondary)
-                    .padding()
-            } else {
-                ForEach(viewModel.upcomingEvents.prefix(3)) { event in
-                    EventPreviewRow(event: event)
-                }
             }
             
-            NavigationLink("View All Events") {
-                EventsView()
-            }
-            .font(.system(size: 16, weight: .medium))
-            .padding(.top, 8)
+            // TODO: Fix this!
+            // Registration Button
+//            if !hasCheckedStatus {
+//                ProgressView()
+//                    .padding(.top, 4)
+//            } else {
+//                Button(viewModel.isRegistered ? "Registered" : "Register") {
+//                    Task {
+//                        if viewModel.isRegistered {
+//                            await viewModel.unregisterFromEvent()
+//                        } else {
+//                            await viewModel.registerForEvent()
+//                        }
+//                    }
+//                }
+//                .buttonStyle(.bordered)
+//                .tint(viewModel.isRegistered ? .green : .blue)
+//                .padding(.top, 4)
+//            }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(15)
-        .shadow(radius: 2)
-        .task {
-            await viewModel.fetchUpcomingEvents()
-        }
+        .padding(.vertical, 8)
         .onAppear {
             viewModel.updateAuthService(authService)
+            viewModel.checkRegistrationStatus()
+            hasCheckedStatus = true
+        }
+    }
+    
+    // Helper function for category colors
+    private func categoryColor(for category: EventCategory) -> Color {
+        switch category {
+        case .technology:
+            return .blue
+        case .health:
+            return .green
+        case .social:
+            return .orange
+        case .entertainment:
+            return .purple
+        case .educational:
+            return .red
+        case .other:
+            return .gray
         }
     }
 }
@@ -261,7 +271,6 @@ struct EventPreviewRow: View {
 
 class EventViewModel: ObservableObject {
     @Published private(set) var events: [Event] = []
-    @Published private(set) var upcomingEvents: [Event] = []
     @Published private(set) var isLoading = false
     @Published private(set) var hasMoreEvents = false
     @Published var error: Error?
@@ -271,27 +280,22 @@ class EventViewModel: ObservableObject {
     private var currentQuery = EventQuery()
     private let eventService = EventService()
     private var authService: AuthService
+    var upcomingEvents : [Event]
     
     let categories = ["educational", "social", "health", "technology", "entertainment", "other"]
     
     init(authService: AuthService) {
         self.authService = authService
-        Task {
-            await fetchEvents()
-        }
+        self.upcomingEvents = []
     }
     
+    @MainActor
     func updateAuthService(_ newAuthService: AuthService) {
-        print("🔄 Updating AuthService in EventViewModel")
         self.authService = newAuthService
-        Task {
-            await fetchEvents()
-        }
     }
     
     @MainActor
     func fetchEvents() async {
-        print("📥 Fetching events...")
         isLoading = true
         currentPage = 1
         
@@ -299,9 +303,7 @@ class EventViewModel: ObservableObject {
             let response = try await eventService.fetchEvents(query: currentQuery)
             events = response.events
             hasMoreEvents = response.pagination.hasNextPage
-            print("✅ Successfully fetched \(events.count) events")
         } catch {
-            print("❌ Error fetching events: \(error.localizedDescription)")
             self.error = error
         }
         
@@ -353,8 +355,33 @@ class EventViewModel: ObservableObject {
     @MainActor
     func refreshEvents() async {
         print("🔄 Refreshing events...")
+        isLoading = true
         currentPage = 1
-        await fetchEvents()
+        
+        do {
+            // Clear cache before fetching fresh data
+            eventService.clearCache()
+            
+            // Create a new query to ensure fresh data
+            let freshQuery = EventQuery(
+                page: currentPage,
+                limit: limit,
+                search: currentQuery.search,
+                category: currentQuery.category,
+                isOnline: currentQuery.isOnline,
+                city: currentQuery.city
+            )
+            
+            let response = try await eventService.fetchEvents(query: freshQuery)
+            events = response.events
+            hasMoreEvents = response.pagination.hasNextPage
+            print("✅ Successfully refreshed events")
+        } catch {
+            print("❌ Error refreshing events: \(error.localizedDescription)")
+            self.error = error
+        }
+        
+        isLoading = false
     }
     
     @MainActor
@@ -405,6 +432,8 @@ struct EventDetailView: View {
     let event: Event
     @StateObject private var viewModel: EventDetailViewModel
     @EnvironmentObject var authService: AuthService
+    @State private var hasCheckedStatus = false
+    
     
     init(event: Event) {
         self.event = event
@@ -458,14 +487,14 @@ struct EventDetailView: View {
                         .cornerRadius(12)
                     
                     if !event.tags.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(event.tags, id: \.self) { tag in
-                                    TagView(tag: tag)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(event.tags, id: \.self) { tag in
+                                        TagView(tag: tag)
+                                    }
                                 }
                             }
                         }
-                    }
                     
                     // Title and Date
                     Text(event.title)
@@ -582,34 +611,36 @@ struct EventDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            if let viewModelAuthService = viewModel.authService as? AuthService {
-                viewModelAuthService.currentUser = authService.currentUser
-            }
+            viewModel.updateAuthService(authService)
+            viewModel.checkRegistrationStatus()
+            hasCheckedStatus = true
         }
         .toolbar {
-            if !viewModel.isRegistered {
-                Button(action: {
-                    Task {
-                        await viewModel.registerForEvent()
+            if hasCheckedStatus {
+                if !viewModel.isRegistered {
+                    Button(action: {
+                        Task {
+                            await viewModel.registerForEvent()
+                        }
+                    }) {
+                        Text("Register")
+                            .bold()
+                            .foregroundColor(.white)
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(event.currentParticipants >= event.quota ? Color.gray : Color.blue)
+                            .cornerRadius(8)
                     }
-                }) {
-                    Text("Register")
-                        .bold()
-                        .foregroundColor(.white)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(event.currentParticipants >= event.quota ? Color.gray : Color.blue)
-                        .cornerRadius(8)
-                }
-                .disabled(event.currentParticipants >= event.quota)
-            } else {
-                Button(action: {
-                    Task {
-                        await viewModel.unregisterFromEvent()
+                    .disabled(event.currentParticipants >= event.quota)
+                } else {
+                    Button(action: {
+                        Task {
+                            await viewModel.unregisterFromEvent()
+                        }
+                    }) {
+                        Text("Unregister")
+                            .foregroundColor(.red)
                     }
-                }) {
-                    Text("Unregister")
-                        .foregroundColor(.red)
                 }
             }
         }
@@ -705,10 +736,12 @@ struct FilterChip: View {
 }
 
 // EventDetailViewModel.swift
+@MainActor
 class EventDetailViewModel: ObservableObject {
     @Published private(set) var isRegistered = false
     @Published private(set) var isLoading = false
     @Published var error: Error?
+    @State private var hasCheckedStatus = false
     
     private let event: Event
     private let eventService: EventService
@@ -720,47 +753,28 @@ class EventDetailViewModel: ObservableObject {
         self.eventService = EventService()
         self.authService = authService
         
-        // Check registration status
-        Task {
-            await checkRegistrationStatus()
-        }
+        // No need to call checkRegistrationStatus here
+        // It will be called when the view appears
     }
     
-    // Add method to update AuthService
     func updateAuthService(_ newAuthService: AuthService) {
         print("🔄 Updating AuthService in EventDetailViewModel")
         self.authService = newAuthService
-        // Recheck registration status with new auth service
-        Task {
-            await checkRegistrationStatus()
-        }
+        checkRegistrationStatus()
     }
     
-    func checkRegistrationStatus() async {
+    func checkRegistrationStatus() {
         print("🔍 Checking registration status...")
-        isLoading = true
-        do {
-            let userId = authService.currentUser?.id ?? ""
-            if !userId.isEmpty {
-                print("👤 Found userId from AuthService: \(userId)")
-                isRegistered = try await eventService.checkRegistrationStatus(
-                    eventId: event.id,
-                    userId: userId
-                )
-                print("✅ Registration status check complete. isRegistered: \(isRegistered)")
-            } else {
-                print("⚠️ No userId available from AuthService")
-                isRegistered = false
-            }
-        } catch {
-            print("❌ Error checking registration status: \(error.localizedDescription)")
-            self.error = error
+        if let userId = authService.currentUser?.id {
+            print("👤 Found userId from AuthService: \(userId)")
+            isRegistered = event.participants.contains(userId)
+            print("✅ Registration status check complete. isRegistered: \(isRegistered)")
+        } else {
+            print("⚠️ No userId available from AuthService")
             isRegistered = false
         }
-        isLoading = false
     }
     
-    @MainActor
     func registerForEvent() async {
         print("📝 Starting event registration process...")
         isLoading = true
@@ -773,7 +787,6 @@ class EventDetailViewModel: ObservableObject {
                 print("✅ Registration successful")
             } else {
                 print("⚠️ Registration failed - No userId available from AuthService")
-//                error = NetworkError.invalidRequest
                 return
             }
         } catch {
@@ -785,7 +798,6 @@ class EventDetailViewModel: ObservableObject {
         print("🔄 Registration process completed. isRegistered: \(isRegistered)")
     }
     
-    @MainActor
     func unregisterFromEvent() async {
         print("🗑 Starting event unregistration process...")
         isLoading = true
@@ -798,7 +810,6 @@ class EventDetailViewModel: ObservableObject {
                 print("✅ Unregistration successful")
             } else {
                 print("⚠️ Unregistration failed - No userId available from AuthService")
-//                error = NetworkError.invalidRequest
                 return
             }
         } catch {
@@ -809,17 +820,15 @@ class EventDetailViewModel: ObservableObject {
         print("🔄 Unregistration process completed. isRegistered: \(isRegistered)")
     }
     
-    // Helper method to get current registration status
+    // Helper computed properties
     var registrationStatus: Bool {
         isRegistered
     }
     
-    // Helper method to check if the event is full
     var isEventFull: Bool {
         event.currentParticipants >= event.quota
     }
     
-    // Helper method to format remaining spots
     var remainingSpots: String {
         let remaining = event.quota - event.currentParticipants
         return "\(remaining) spot\(remaining == 1 ? "" : "s") remaining"

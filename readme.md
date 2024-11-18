@@ -89,6 +89,23 @@ Backlog:
 - [ ] Remove help requested and remove save for later (just change backebd) -> Easy 
 
 
+Bugs:
+
+- Important
+
+## Middle: Functionality
+- [ ] EventRow cant show properly Registered/Not -> fix how it is updated
+
+## Easy: Functionality
+- [ ] When u just open Events page => show some events
+- [ ] Add pagination
+- [ ] Helper for category colors -> make more reusable bc in EventRow & in EventDetail
+
+## Easy: Better UI
+- [ ] Lesson description -> align left
+
+
+
 
 
 Ideas:

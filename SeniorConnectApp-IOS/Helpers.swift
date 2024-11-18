@@ -168,3 +168,51 @@ struct TagView: View {
             .cornerRadius(8)
     }
 }
+
+
+// MARK: - Upcoming Events Preview
+struct UpcomingEventsPreview: View {
+    @StateObject private var viewModel: EventViewModel
+    @EnvironmentObject var authService: AuthService
+    
+    // Add initializer
+    init() {
+        self._viewModel = StateObject(wrappedValue: EventViewModel(authService: AuthService()))
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Upcoming Events")
+                .font(.system(size: 20, weight: .bold))
+            
+            if viewModel.isLoading {
+                ProgressView()
+            } else if viewModel.upcomingEvents.isEmpty {
+                Text("No upcoming events")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary)
+                    .padding()
+            } else {
+                ForEach(viewModel.upcomingEvents.prefix(3)) { event in
+                    EventPreviewRow(event: event)
+                }
+            }
+            
+            NavigationLink("View All Events") {
+                EventsView()
+            }
+            .font(.system(size: 16, weight: .medium))
+            .padding(.top, 8)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(15)
+        .shadow(radius: 2)
+        .task {
+            await viewModel.fetchUpcomingEvents()
+        }
+        .onAppear {
+            viewModel.updateAuthService(authService)
+        }
+    }
+}

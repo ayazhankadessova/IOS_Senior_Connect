@@ -11,7 +11,54 @@ import Foundation
 class EventService {
     private let baseURL = "http://localhost:3000/api"
     
+    private var cache: [String: Any] = [:] // Simple cache
+    private let cacheTimeout: TimeInterval = 300 // 5 minutes
+    
+    // Add cache structure
+    private struct CacheEntry {
+        let data: Any
+        let timestamp: Date
+        
+        var isValid: Bool {
+            Date().timeIntervalSince(timestamp) < 300 // 5 minutes
+        }
+    }
+    
+    private var eventCache: [String: CacheEntry] = [:]
+    
+    func clearCache() {
+        eventCache.removeAll()
+        print("🧹 Cache cleared")
+    }
+    
+                
     func fetchEvents(query: EventQuery) async throws -> PaginatedResponse<Event> {
+        // When refreshing, skip cache and fetch from network
+        if query.page == 1 {
+            print("📥 Fetching fresh data from network")
+            return try await fetchEventsFromNetwork(query: query)
+        }
+        
+        let cacheKey = query.cacheKey
+        
+        // Check cache for subsequent pages
+        if let cached = eventCache[cacheKey],
+           cached.isValid,
+           let response = cached.data as? PaginatedResponse<Event> {
+            print("📦 Using cached events data")
+            return response
+        }
+        
+        // If not in cache, fetch from network
+        let response = try await fetchEventsFromNetwork(query: query)
+        
+        // Store in cache
+        eventCache[cacheKey] = CacheEntry(data: response, timestamp: Date())
+        return response
+    }
+    
+    // Renamed to fetchEventsFromNetwork
+    private func fetchEventsFromNetwork(query: EventQuery) async throws -> PaginatedResponse<Event> {
         print("📅 Fetching events with query parameters...")
         
         var components = URLComponents(string: "\(baseURL)/events")!
@@ -45,37 +92,39 @@ class EventService {
         
         print("🔍 Making request to: \(url.absoluteString)")
         
-        do {
-            let (data, response) = try await URLSession.shared.data(from: url)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("❌ Invalid response type")
-                throw NetworkError.invalidResponse
-            }
-            
-            print("📡 Response status code: \(httpResponse.statusCode)")
-            
-            guard (200...299).contains(httpResponse.statusCode) else {
-                if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let errorMessage = errorJson["error"] as? String {
-                    print("🚫 Server error: \(errorMessage)")
-                }
-                throw NetworkError.invalidResponse
-            }
-            
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("📦 Raw response data: \(jsonString)")
-            }
-            
-            let responseDec = try JSONDecoder.authDecoder.decode(PaginatedResponse<Event>.self, from: data)
-            print("✅ Successfully fetched \(responseDec.events.count) events")
-            print("📊 Pagination: Page \(responseDec.pagination.currentPage) of \(responseDec.pagination.totalPages)")
-            
-            return responseDec
-        } catch {
-            print("❌ Error fetching events: \(error)")
-            throw error
+        let (data, response) = try await URLSession.shared.data(from: url)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("❌ Invalid response type")
+            throw NetworkError.invalidResponse
         }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let errorMessage = errorJson["error"] as? String {
+                print("🚫 Server error: \(errorMessage)")
+            }
+            throw NetworkError.invalidResponse
+        }
+        
+        let responseDec = try JSONDecoder.authDecoder.decode(PaginatedResponse<Event>.self, from: data)
+        print("✅ Successfully fetched \(responseDec.events.count) events")
+        
+        return responseDec
+    }
+    
+    // Add method to clear specific cache entry
+    func clearCache(for query: EventQuery) {
+        eventCache.removeValue(forKey: query.cacheKey)
+        print("🧹 Cache cleared for query: \(query.cacheKey)")
+    }
+    
+    // Add method to check if data is cached
+    func isCached(for query: EventQuery) -> Bool {
+        if let cached = eventCache[query.cacheKey] {
+            return cached.isValid
+        }
+        return false
     }
     
     func registerForEvent(_ eventId: String, userId: String) async throws {

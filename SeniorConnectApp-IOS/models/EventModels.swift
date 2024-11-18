@@ -85,8 +85,20 @@ struct EventQuery {
     var category: String?
     var isOnline: Bool?
     var city: String?
-    var startDate: Date?
-    var endDate: Date?
+    
+    // Add description property
+    var cacheKey: String {
+        let components = [
+            "page_\(page)",
+            "limit_\(limit)",
+            search.map { "search_\($0)" },
+            category.map { "category_\($0)" },
+            isOnline.map { "online_\($0)" },
+            city.map { "city_\($0)" }
+        ].compactMap { $0 }
+        
+        return components.joined(separator: "_")
+    }
 }
 
 struct PaginatedResponse<T: Codable>: Codable {
