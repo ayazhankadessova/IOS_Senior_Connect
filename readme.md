@@ -85,11 +85,12 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [x] Add Sample Events (10)
 - [x] check lessons
 - [x] filter by category
-- [ ] tab that shows registered events
+- [x] tab that shows registered events
 - [ ] put events code to diff folders for better readability
+- [ ] Make quick actions workable
+
 
 ## Backlog:
-- [ ] Make quick actions workable
 - [ ] Your Learning Progress for every category ?
 - [ ] Make Detail View look good like in drafts
 - [ ] go thru the code, remove lengthy views!
