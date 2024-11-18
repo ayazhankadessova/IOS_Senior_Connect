@@ -253,13 +253,6 @@ struct TutorialStep: Identifiable {
     let content: String
 }
 
-struct QuickAction: Identifiable {
-    let id = UUID()
-    let title: String
-    let icon: String
-    let color: Color
-}
-
 struct StepActionIdentifier: Hashable {
     let stepId: String
     let actionItemId: String

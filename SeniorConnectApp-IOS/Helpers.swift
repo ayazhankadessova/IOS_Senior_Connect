@@ -9,11 +9,13 @@ import Foundation
 import SwiftUI
 
 struct QuickActionsGrid: View {
+    @EnvironmentObject var navigation: NavigationViewModel
+    
     let actions = [
-        QuickAction(title: "Join Tutorial", icon: "book.fill", color: .blue),
-        QuickAction(title: "Find Events", icon: "calendar", color: .green),
-        QuickAction(title: "Get Help", icon: "questionmark.circle.fill", color: .purple),
-        QuickAction(title: "Settings", icon: "gear", color: .gray)
+        QuickAction(title: "Join Tutorial", icon: "book.fill", color: .blue, tab: .tutorials),
+        QuickAction(title: "Find Events", icon: "calendar", color: .green, tab: .events),
+        QuickAction(title: "Get Help", icon: "questionmark.circle.fill", color: .purple, tab: .help),
+        QuickAction(title: "Settings", icon: "gear", color: .gray, tab: .profile)
     ]
     
     var body: some View {
@@ -23,9 +25,32 @@ struct QuickActionsGrid: View {
         ], spacing: 16) {
             ForEach(actions) { action in
                 QuickActionButton(action: action)
+                    .onTapGesture {
+                        navigation.selectedTab = action.tab
+                    }
             }
         }
     }
+}
+
+struct QuickAction: Identifiable {
+    let id = UUID()
+    let title: String
+    let icon: String
+    let color: Color
+    let tab: Tab
+}
+
+enum Tab {
+    case tutorials
+    case events
+    case help
+    case profile
+    case home
+}
+
+class NavigationViewModel: ObservableObject {
+    @Published var selectedTab: Tab = .tutorials
 }
 
 struct TutorialPromptView: View {

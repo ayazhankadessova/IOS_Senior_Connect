@@ -86,8 +86,13 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [x] check lessons
 - [x] filter by category
 - [x] tab that shows registered events
-- [ ] put events code to diff folders for better readability
+
+
+## 19 nov
 - [ ] Make quick actions workable
+- [ ] put events code to diff folders for better readability
+- [ ] Mentor help request
+
 
 
 ## Backlog:

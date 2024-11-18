@@ -31,6 +31,8 @@
 		BCFB801E2CE84962000E3574 /* EventModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB801D2CE84962000E3574 /* EventModels.swift */; };
 		BCFB80202CE84999000E3574 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB801F2CE84999000E3574 /* EventService.swift */; };
 		BCFB80222CEB3834000E3574 /* MyProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80212CEB3834000E3574 /* MyProfileView.swift */; };
+		BCFB80242CEB9C64000E3574 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80232CEB9C64000E3574 /* HelpView.swift */; };
+		BCFB80262CEBA38F000E3574 /* MentorshipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80252CEBA38F000E3574 /* MentorshipService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2014,6 +2016,8 @@
 		BCFB801D2CE84962000E3574 /* EventModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventModels.swift; sourceTree = "<group>"; };
 		BCFB801F2CE84999000E3574 /* EventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventService.swift; sourceTree = "<group>"; };
 		BCFB80212CEB3834000E3574 /* MyProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileView.swift; sourceTree = "<group>"; };
+		BCFB80232CEB9C64000E3574 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
+		BCFB80252CEBA38F000E3574 /* MentorshipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentorshipService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2085,6 +2089,8 @@
 				BCFB77352CE73292000E3574 /* drafts.swift */,
 				BCFB801F2CE84999000E3574 /* EventService.swift */,
 				BCFB80212CEB3834000E3574 /* MyProfileView.swift */,
+				BCFB80232CEB9C64000E3574 /* HelpView.swift */,
+				BCFB80252CEBA38F000E3574 /* MentorshipService.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -6956,10 +6962,12 @@
 				BC0F9EDD2CE4EE700016DD1C /* Helpers.swift in Sources */,
 				BC0F9EC52CE486EB0016DD1C /* MainTabView.swift in Sources */,
 				BC0F9ECF2CE4876D0016DD1C /* LoginView.swift in Sources */,
+				BCFB80242CEB9C64000E3574 /* HelpView.swift in Sources */,
 				BCFB77362CE73292000E3574 /* drafts.swift in Sources */,
 				BC0F9EDB2CE4ED710016DD1C /* EventsView.swift in Sources */,
 				BCFB80222CEB3834000E3574 /* MyProfileView.swift in Sources */,
 				BC0F9ECD2CE4875F0016DD1C /* AuthService.swift in Sources */,
+				BCFB80262CEBA38F000E3574 /* MentorshipService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

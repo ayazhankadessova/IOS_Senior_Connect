@@ -15,6 +15,7 @@ import WebKit
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showingTutorialPrompt = true
+    @EnvironmentObject var authService: AuthService
     
     var body: some View {
         NavigationStack {
