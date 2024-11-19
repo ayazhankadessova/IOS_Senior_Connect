@@ -20,8 +20,6 @@ struct SeniorConnectApp_IOSApp: App {
             } else {
                 LoginView()
                     .environmentObject(authService).environmentObject(navigation)
-//                MainTabView()
-//                    .environmentObject(authService)
             }
         }
     }

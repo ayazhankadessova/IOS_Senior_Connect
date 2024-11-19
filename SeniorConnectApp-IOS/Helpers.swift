@@ -50,7 +50,7 @@ enum Tab {
 }
 
 class NavigationViewModel: ObservableObject {
-    @Published var selectedTab: Tab = .tutorials
+    @Published var selectedTab: Tab = .home
 }
 
 struct TutorialPromptView: View {
@@ -121,23 +121,17 @@ struct QuickActionButton: View {
     let action: QuickAction
     
     var body: some View {
-        Button {
-            // Handle action
-        } label: {
-            VStack(spacing: 12) {
-                Image(systemName: action.icon)
-                    .font(.system(size: 30))
-                    .foregroundColor(action.color)
-                
-                Text(action.title)
-                    .font(.system(size: 16))
-                    .foregroundColor(.primary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(action.color.opacity(0.1))
-            .cornerRadius(12)
+        VStack {
+            Image(systemName: action.icon)
+                .font(.largeTitle)
+                .foregroundColor(action.color)
+            Text(action.title)
+                .font(.caption)
         }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.secondary.opacity(0.1))
+        .cornerRadius(10)
     }
 }
 

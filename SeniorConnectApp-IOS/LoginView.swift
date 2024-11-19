@@ -114,6 +114,7 @@ struct LoginView: View {
 struct SignupView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var authService: AuthService
+    @AppStorage("hasCompletedInitialTutorial") private var hasCompletedInitialTutorial = false
     @State private var name = ""
     @State private var email = ""
     @State private var password = ""
@@ -191,6 +192,8 @@ struct SignupView: View {
         do {
             let credentials = SignupCredentials(name: name, email: email, password: password)
             let _ = try await authService.signup(credentials: credentials)
+            // Reset the tutorial flag for new users
+            hasCompletedInitialTutorial = false
             dismiss()
         } catch AuthError.invalidCredentials {
             errorMessage = "Invalid information provided"

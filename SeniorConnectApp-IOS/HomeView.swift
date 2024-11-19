@@ -11,11 +11,11 @@ import SwiftUI
 import SwiftData
 import WebKit
 
-// MARK: - Home View
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var showingTutorialPrompt = true
     @EnvironmentObject var authService: AuthService
+    @AppStorage("hasCompletedInitialTutorial") private var hasCompletedInitialTutorial = false
+    @State private var showingTutorialPrompt = false
     
     var body: some View {
         NavigationStack {
@@ -36,6 +36,14 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showingTutorialPrompt) {
             TutorialPromptView()
+        }
+        .onAppear {
+            // Only show tutorial prompt if user hasn't completed it
+            if !hasCompletedInitialTutorial {
+                showingTutorialPrompt = true
+                // Mark as completed once shown
+                hasCompletedInitialTutorial = true
+            }
         }
     }
 }

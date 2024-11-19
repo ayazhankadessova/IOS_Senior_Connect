@@ -24,7 +24,7 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - [ ] EventRow cant show properly Registered/Not -> fix how it is updated
 
 ## Easy: Functionality
-- [ ] When u just open Events page => show some events
+- [x] When u just open Events page => show some events
 - [ ] Add pagination
 - [ ] Helper for category colors -> make more reusable bc in EventRow & in EventDetail
 
@@ -64,7 +64,7 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 
 ### 15 nov
 - [x] Refresh Updates
-- [ ] Dont show "u wanna see quick tutorial thing" every time 
+- [x] Dont show "u wanna see quick tutorial thing" every time 
 
 ### 16-17 Nov
 - [ ] Try out CRUD Opers
@@ -89,7 +89,7 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 
 
 ## 19 nov
-- [ ] Make quick actions workable
+- [x] Make quick actions workable
 - [ ] put events code to diff folders for better readability
 - [ ] update after added help req 
 - [x] can see reqs
