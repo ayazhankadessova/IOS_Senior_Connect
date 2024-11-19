@@ -158,6 +158,7 @@ class MentorshipRequestDetailViewModel: ObservableObject {
 struct RequestMentorshipView: View {
     @StateObject private var viewModel = RequestMentorshipViewModel()
     @EnvironmentObject var authService: AuthService
+    @Environment(\.presentationMode) var presentationMode
     
     let skillLevels = ["Beginner", "Intermediate", "Advanced"]
     
@@ -169,6 +170,10 @@ struct RequestMentorshipView: View {
                 
                 TextEditor(text: $viewModel.description)
                     .frame(height: 100)
+                
+                TextField("Phone Number", text: $viewModel.phoneNumber)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.phonePad)
                 
                 Picker("Skill Level", selection: $viewModel.skillLevel) {
                     ForEach(skillLevels, id: \.self) { level in
@@ -191,6 +196,13 @@ struct RequestMentorshipView: View {
             }
         }
         .navigationTitle("Request Mentorship")
+        .alert(isPresented: $viewModel.showError) {
+            Alert(
+                title: Text("Error"),
+                message: Text(viewModel.errorMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
 }
 
@@ -213,23 +225,38 @@ class HelpViewModel: ObservableObject {
 class RequestMentorshipViewModel: ObservableObject {
     @Published var topic = ""
     @Published var description = ""
+    @Published var phoneNumber = ""
     @Published var skillLevel = "Beginner"
+    @Published var showError = false
+    @Published var errorMessage = ""
+    
     private let mentorshipService = MentorshipService()
     
     func submitMentorshipRequest(userId: String) {
+        // Basic validation
+        guard !topic.isEmpty, !description.isEmpty, !phoneNumber.isEmpty else {
+            showError = true
+            errorMessage = "Please fill in all fields"
+            return
+        }
+        
         mentorshipService.createMentorshipRequest(
             topic: topic,
             description: description,
+            phoneNumber: phoneNumber,
             skillLevel: skillLevel,
             userId: userId
         ) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
-                case .success:
-                    print("Mentorship request submitted successfully")
+                case .success(let request):
+                    print("Mentorship request submitted successfully: \(request)")
                     self?.topic = ""
                     self?.description = ""
+                    self?.phoneNumber = ""
                 case .failure(let error):
+                    self?.showError = true
+                    self?.errorMessage = error.localizedDescription
                     print("Error submitting mentorship request: \(error)")
                 }
             }
