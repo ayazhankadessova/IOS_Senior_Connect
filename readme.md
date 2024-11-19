@@ -91,10 +91,11 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 ## 19 nov
 - [ ] Make quick actions workable
 - [ ] put events code to diff folders for better readability
+- [ ] update after added help req 
 - [x] can see reqs
 - [x] Mentor help request
-- [ ] Make help view look better
-- [ ] Add delete mentorship request
+- [x] Make help view look better
+- [x] Add delete mentorship request
 
 
 

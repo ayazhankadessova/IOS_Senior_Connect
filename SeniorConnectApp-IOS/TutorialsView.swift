@@ -302,7 +302,12 @@ struct LessonDetailView: View {
     @State private var completedSteps: Set<String> = []
     @State private var completedStepActions: Set<StepActionIdentifier> = []
     @State private var hasUnsavedChanges = false
+    @State private var showingMentorRequestSheet = false
+    @State private var phoneNumber = ""
+    @State private var skillLevel = "Beginner"
+    @State private var mentorRequestSuccessful = false
     let tutorialDetailView: TutorialDetailView
+    @State private var formData = MentorRequestFormData()
     
     private func findLessonProgress(for lessonId: String) -> CategoryLessonProgress? {
         guard let user = authService.currentUser else { return nil }
@@ -470,31 +475,105 @@ struct LessonDetailView: View {
                     Spacer()
                     
                     Button {
-                        showingMentorRequest = true
+                        viewModel.setCurrentLesson(lesson)
+                        formData = MentorRequestFormData() // Reset form data
+                        showingMentorRequestSheet = true
                     } label: {
                         Label("Request Help", systemImage: "person.fill.questionmark")
                     }
+                    .sheet(isPresented: $showingMentorRequestSheet) {
+                        MentorRequestForm(
+                            formData: $formData,
+                            showForm: $showingMentorRequestSheet,
+                            delegate: viewModel,
+                            title: "Request Help",
+                            subtitle: "Request help with: \(lesson.title)",
+                            isStandalone: false // This is not a standalone form
+                        )
+                    }
                 }
-                .padding()
+                .sheet(isPresented: $showingMentorRequestSheet) {
+                    NavigationView {
+                        Form {
+                            Section(header: Text("Contact Information")) {
+                                TextField("Phone Number", text: $phoneNumber)
+                                    .keyboardType(.phonePad)
+                                    .textContentType(.telephoneNumber)
+                            }
+                            
+                            Section(header: Text("Skill Level")) {
+                                Picker("Your current skill level", selection: $skillLevel) {
+                                    Text("Beginner").tag("Beginner")
+                                    Text("Intermediate").tag("Intermediate")
+                                    Text("Advanced").tag("Advanced")
+                                }
+                            }
+                            
+                            Section(header: Text("Additional Notes")) {
+                                TextEditor(text: $mentorNotes)
+                                    .frame(height: 100)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.2))
+                                    )
+                            }
+                            
+                            Section {
+                                Button(action: {
+                                    if !phoneNumber.isEmpty {
+                                        Task {
+                                            do {
+                                                try await viewModel.requestMentorHelp(
+                                                    for: lesson,
+                                                    notes: mentorNotes,
+                                                    phoneNumber: phoneNumber,
+                                                    skillLevel: skillLevel
+                                                )
+                                                mentorRequestSuccessful = true
+                                                showingMentorRequestSheet = false
+                                            } catch {
+                                                errorMessage = "Failed to request help: \(error.localizedDescription)"
+                                                showError = true
+                                            }
+                                        }
+                                    } else {
+                                        errorMessage = "Please enter your phone number"
+                                        showError = true
+                                    }
+                                }) {
+                                    Text("Submit Request")
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                            }
+                        }
+                        .navigationTitle("Request Mentor Help")
+                        .navigationBarItems(
+                            trailing: Button("Cancel") {
+                                showingMentorRequestSheet = false
+                            }
+                        )
+                    }
+                }
+                .alert("Success", isPresented: $mentorRequestSuccessful) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text("Your mentor request has been submitted successfully!")
+                }
+                .alert("Error", isPresented: $showError) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(errorMessage)
+                }
             }
             .padding()
         }
         .navigationTitle(lesson.title)
         .sheet(isPresented: $showingVideo) {
             VideoPlayerView(videoURL: lesson.videoUrl ?? "")
-        }
-        .alert("Request Mentor Help", isPresented: $showingMentorRequest) {
-            Button("Cancel", role: .cancel) { }
-            Button("Request Help") {
-                Task {
-                    do {
-                        try await viewModel.requestMentorHelp(for: lesson, notes: mentorNotes)
-                    } catch {
-                        errorMessage = "Failed to request help: \(error.localizedDescription)"
-                        showError = true
-                    }
-                }
-            }
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }

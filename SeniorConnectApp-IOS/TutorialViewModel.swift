@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-class TutorialViewModel: ObservableObject {
+class TutorialViewModel: ObservableObject, MentorRequestFormDelegate {
     private let baseURL = "http://localhost:3000"
     
     @Published var selectedLesson: Lesson?
@@ -17,12 +17,18 @@ class TutorialViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var lessonProgress: CategoryLessonProgress?
     var tutorialDetailView: TutorialDetailView?
+    private let mentorshipService = MentorshipService()
+    private var currentLesson: Lesson?
     
     private let userId: String
     
     init(userId: String) {
         self.userId = userId
     }
+    
+    func setCurrentLesson(_ lesson: Lesson) {
+            self.currentLesson = lesson
+        }
     
     func updateBatchProgress(
             category: String,
@@ -117,44 +123,54 @@ class TutorialViewModel: ObservableObject {
         
     }
         
-    func requestMentorHelp(for lesson: Lesson, notes: String? = nil) async throws {
-            print("Requesting mentor help for lesson: \(lesson.lessonId)")
-            let requestData = [
-                "category": "smartphoneBasics",
-                "lessonId": lesson.lessonId,
-                "notes": notes
-            ] as [String : Any?]
+    func requestMentorHelp(
+            for lesson: Lesson,
+            notes: String?,
+            phoneNumber: String,
+            skillLevel: String
+        ) async throws {
+            print("Creating mentorship request for lesson: \(lesson.title)")
             
-            let url = URL(string: "\(baseURL)/api/users/\(userId)/progress/request-mentor")!
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            // Create a description that includes lesson details and user notes
+            let description = """
+            Lesson: \(lesson.title)
+            Lesson ID: \(lesson.lessonId)
             
-            let jsonData = try JSONSerialization.data(withJSONObject: requestData.compactMapValues { $0 })
-            request.httpBody = jsonData
+            Additional Notes:
+            \(notes ?? "No additional notes provided")
+            """
             
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            // Debug response
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("Request mentor help response:", responseString)
+            return try await withCheckedThrowingContinuation { continuation in
+                mentorshipService.createMentorshipRequest(
+                    topic: "Help with: \(lesson.title)",
+                    description: description,
+                    phoneNumber: phoneNumber, // Pass the phone number
+                    skillLevel: skillLevel,   // Pass the skill level
+                    userId: userId
+                ) { result in
+                    switch result {
+                    case .success(let request):
+                        print("Successfully created mentorship request: \(request)")
+                        continuation.resume()
+                    case .failure(let error):
+                        print("Failed to create mentorship request: \(error)")
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
+    
+    func submitMentorRequest(formData: MentorRequestFormData) async throws {
+            guard let lesson = currentLesson else {
+                throw NSError(domain: "TutorialViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "No lesson selected"])
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw NetworkError.invalidResponse
-            }
-            
-            guard (200...299).contains(httpResponse.statusCode) else {
-                throw NetworkError.serverError("Server returned status code \(httpResponse.statusCode)")
-            }
-            
-            let progressResponse = try JSONDecoder.authDecoder.decode(MentorHelpResponse.self, from: data)
-            
-            // Update local progress if needed
-            await MainActor.run {
-                self.lessonProgress = progressResponse.progress
-            }
-            
+            try await requestMentorHelp(
+                for: lesson,
+                notes: formData.description,
+                phoneNumber: formData.phoneNumber,
+                skillLevel: formData.skillLevel
+            )
         }
     
     func fetchLessonProgress(lessonId: String) async throws {
@@ -167,6 +183,7 @@ class TutorialViewModel: ObservableObject {
             }
         }
 }
+
 
 extension JSONDecoder {
     static var authDecoder: JSONDecoder {

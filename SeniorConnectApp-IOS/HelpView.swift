@@ -142,120 +142,39 @@ class MentorshipRequestDetailViewModel: ObservableObject {
 }
 
 struct RequestMentorshipView: View {
-    @StateObject private var viewModel = RequestMentorshipViewModel()
     @EnvironmentObject var authService: AuthService
     @Environment(\.presentationMode) var presentationMode
+    @State private var formData = MentorRequestFormData()
+    @State private var showForm = true
     
-    let skillLevels = ["Beginner", "Intermediate", "Advanced"]
+    // Initialize ViewModel with userId from authService
+    @StateObject private var viewModel: RequestMentorshipViewModel
+    
+    init() {
+        // Create the StateObject with a default value
+        // We'll update it in onAppear if needed
+        _viewModel = StateObject(wrappedValue: RequestMentorshipViewModel(userId: ""))
+    }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header Section
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Request Mentorship")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.primary)
-                    
-                    Text("Fill in the details below to connect with a mentor who can help guide you on your journey.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(.bottom)
-                
-                // Form Fields
-                VStack(spacing: 20) {
-                    // Topic Field
-                    FormField(
-                        title: "Topic",
-                        placeholder: "What would you like to learn?",
-                        text: $viewModel.topic,
-                        icon: "book.fill"
-                    )
-                    
-                    // Description Field
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "text.alignleft")
-                                .foregroundColor(.blue)
-                            Text("Description")
-                                .font(.headline)
-                        }
-                        
-                        TextEditor(text: $viewModel.description)
-                            .frame(height: 120)
-                            .padding(8)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray.opacity(0.2))
-                            )
-                    }
-                    
-                    // Phone Number Field
-                    FormField(
-                        title: "Phone Number",
-                        placeholder: "Enter your phone number",
-                        text: $viewModel.phoneNumber,
-                        icon: "phone.fill",
-                        keyboardType: .phonePad
-                    )
-                    
-                    // Skill Level Picker
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "stairs")
-                                .foregroundColor(.blue)
-                            Text("Skill Level")
-                                .font(.headline)
-                        }
-                        
-                        Picker("", selection: $viewModel.skillLevel) {
-                            ForEach(skillLevels, id: \.self) { level in
-                                Text(level).tag(level)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                    }
-                }
-                
-                // Submit Button
-                Button(action: {
-                    if let userId = authService.currentUser?.id {
-                        viewModel.submitMentorshipRequest(userId: userId)
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "paperplane.fill")
-                        Text("Submit Request")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.blue.opacity(0.3), radius: 5, x: 0, y: 2)
-                }
-                .padding(.top, 20)
+        MentorRequestForm(
+            formData: $formData,
+            showForm: $showForm,
+            delegate: viewModel,
+            title: "Request Mentorship",
+            subtitle: "Fill in the details below to connect with a mentor who can help guide you on your journey.",
+            isStandalone: true
+        )
+        .onAppear {
+            // Update the ViewModel with the correct userId if needed
+            if let userId = authService.currentUser?.id {
+                viewModel.updateUserId(userId)
             }
-            .padding()
         }
-        .navigationBarTitleDisplayMode(.inline)
-        // Error Alert
-        .alert("Error", isPresented: $viewModel.showError) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(viewModel.errorMessage)
-        }
-        // Success Alert
-        .alert("Success", isPresented: $viewModel.showSuccess) {
-            Button("OK") {
+        .onDisappear {
+            if !showForm {
                 presentationMode.wrappedValue.dismiss()
             }
-        } message: {
-            Text("Your mentorship request has been submitted successfully!")
         }
     }
 }
@@ -310,50 +229,42 @@ class HelpViewModel: ObservableObject {
     }
 }
 
-class RequestMentorshipViewModel: ObservableObject {
-    @Published var topic = ""
-    @Published var description = ""
-    @Published var phoneNumber = ""
-    @Published var skillLevel = "Beginner"
+class RequestMentorshipViewModel: ObservableObject, MentorRequestFormDelegate {
+    private let mentorshipService = MentorshipService()
+    var userId: String
     @Published var showError = false
     @Published var showSuccess = false
     @Published var errorMessage = ""
     
-    private let mentorshipService = MentorshipService()
+    init(userId: String) {
+        self.userId = userId
+    }
     
-    func submitMentorshipRequest(userId: String) {
-        // Basic validation
-        guard !topic.isEmpty, !description.isEmpty, !phoneNumber.isEmpty else {
-            showError = true
-            errorMessage = "Please fill in all fields"
-            return
-        }
-        
-        mentorshipService.createMentorshipRequest(
-            topic: topic,
-            description: description,
-            phoneNumber: phoneNumber,
-            skillLevel: skillLevel,
-            userId: userId
-        ) { [weak self] result in
-            DispatchQueue.main.async {
+    func submitMentorRequest(formData: MentorRequestFormData) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            mentorshipService.createMentorshipRequest(
+                topic: formData.topic,
+                description: formData.description,
+                phoneNumber: formData.phoneNumber,
+                skillLevel: formData.skillLevel,
+                userId: userId
+            ) { result in
                 switch result {
                 case .success(let request):
-                    print("Mentorship request submitted successfully: \(request)")
-                    self?.showSuccess = true
-                    self?.topic = ""
-                    self?.description = ""
-                    self?.phoneNumber = ""
-                    
-                    // Post notification to refresh requests
-                    NotificationCenter.default.post(name: .mentorshipRequestCreated, object: nil)
-                    
+                    continuation.resume()
                 case .failure(let error):
-                    self?.showError = true
-                    self?.errorMessage = error.localizedDescription
-                    print("Error submitting mentorship request: \(error)")
+                    continuation.resume(throwing: error)
                 }
             }
+        }
+    }
+}
+
+extension RequestMentorshipViewModel {
+    func updateUserId(_ newUserId: String) {
+        // Only update if the userId is empty (initial state)
+        if userId.isEmpty {
+            userId = newUserId
         }
     }
 }

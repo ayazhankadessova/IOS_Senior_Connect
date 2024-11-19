@@ -420,3 +420,154 @@ struct EmptyRequestsView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
+
+struct MentorRequestForm: View {
+    @Binding var formData: MentorRequestFormData
+    @Binding var showForm: Bool
+    let delegate: MentorRequestFormDelegate
+    let title: String
+    let subtitle: String?
+    let isStandalone: Bool
+    
+    @State private var showError = false
+    @State private var errorMessage = ""
+    @State private var showSuccess = false
+    
+    private let skillLevels = ["Beginner", "Intermediate", "Advanced"]
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    if isStandalone {
+                        FormField(
+                            title: "Topic",
+                            placeholder: "What would you like to learn?",
+                            text: $formData.topic,
+                            icon: "book.fill"
+                        )
+                    }
+                    
+                    // Description Field
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "text.alignleft")
+                                .foregroundColor(.blue)
+                            Text("Description")
+                                .font(.headline)
+                        }
+                        
+                        TextEditor(text: $formData.description)
+                            .frame(height: 120)
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray.opacity(0.2))
+                            )
+                    }
+                    
+                    // Phone Number Field
+                    FormField(
+                        title: "Phone Number",
+                        placeholder: "Enter your phone number",
+                        text: $formData.phoneNumber,
+                        icon: "phone.fill",
+                        keyboardType: .phonePad
+                    )
+                    
+                    // Skill Level Picker
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "stairs")
+                                .foregroundColor(.blue)
+                            Text("Skill Level")
+                                .font(.headline)
+                        }
+                        
+                        Picker("", selection: $formData.skillLevel) {
+                            ForEach(skillLevels, id: \.self) { level in
+                                Text(level).tag(level)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    
+                    // Submit Button
+                    Button(action: {
+                        validateAndSubmit()
+                    }) {
+                        HStack {
+                            Image(systemName: "paperplane.fill")
+                            Text("Submit Request")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .shadow(color: Color.blue.opacity(0.3), radius: 5, x: 0, y: 2)
+                    }
+                    .padding(.top, 20)
+                }
+                .padding()
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(title)
+            .navigationBarItems(
+                trailing: Button("Cancel") {
+                    showForm = false
+                }
+            )
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
+        .alert("Success", isPresented: $showSuccess) {
+            Button("OK") {
+                showForm = false
+            }
+        } message: {
+            Text("Your mentor request has been submitted successfully!")
+        }
+    }
+    
+    private func validateAndSubmit() {
+            // Validate all required fields
+            if formData.phoneNumber.isEmpty {
+                errorMessage = "Please enter your phone number"
+                showError = true
+                return
+            }
+            
+            if isStandalone && formData.topic.isEmpty {
+                errorMessage = "Please enter a topic"
+                showError = true
+                return
+            }
+            
+            if formData.description.isEmpty {
+                errorMessage = "Please provide a description"
+                showError = true
+                return
+            }
+            
+            // Submit if validation passes
+            Task {
+                do {
+                    try await delegate.submitMentorRequest(formData: formData)
+                    await MainActor.run {
+                        showSuccess = true
+                    }
+                } catch {
+                    await MainActor.run {
+                        errorMessage = error.localizedDescription
+                        showError = true
+                    }
+                }
+            }
+        }
+}

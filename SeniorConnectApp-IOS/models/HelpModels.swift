@@ -48,3 +48,15 @@ struct GetMentorshipListResponse: Codable {
     let success: Bool
     let data: [MentorshipRequest]
 }
+
+struct MentorRequestFormData {
+    var topic: String = ""
+    var description: String = ""
+    var phoneNumber: String = ""
+    var skillLevel: String = "Beginner"
+}
+
+// Create a protocol for form submission handling
+protocol MentorRequestFormDelegate {
+    func submitMentorRequest(formData: MentorRequestFormData) async throws
+}
