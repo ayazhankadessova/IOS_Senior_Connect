@@ -241,3 +241,182 @@ struct UpcomingEventsPreview: View {
         }
     }
 }
+
+struct ContactCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "phone.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.blue)
+                Text("Need immediate assistance?")
+                    .font(.headline)
+            }
+            
+            Text("Call our support team:")
+                .foregroundColor(.secondary)
+            
+            Button(action: {
+                guard let url = URL(string: "tel://+85292888547") else { return }
+                UIApplication.shared.open(url)
+            }) {
+                Text("+852 9288 8547")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.blue)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}
+
+struct FAQCard: View {
+    let faq: FAQ
+    let expanded: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button(action: action) {
+                HStack {
+                    Text(faq.question)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                    
+                    Spacer()
+                    
+                    Image(systemName: expanded ? "chevron.up" : "chevron.down")
+                        .foregroundColor(.blue)
+                        .animation(.easeInOut, value: expanded)
+                }
+            }
+            
+            if expanded {
+                Text(faq.answer)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .padding(.top, 4)
+                    .transition(.opacity)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}
+
+struct MentorshipRequestCard: View {
+    let request: MentorshipRequest
+    @EnvironmentObject var authService: AuthService
+    @ObservedObject var viewModel: HelpViewModel
+    @State private var showDeleteAlert = false
+    @State private var navigateToDetail = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(request.topic)
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            HStack {
+                StatusBadge(status: request.status)
+                Spacer()
+                Text(request.formattedDate ?? "")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .contextMenu {
+            Button(role: .destructive) {
+                showDeleteAlert = true
+            } label: {
+                Label("Delete Request", systemImage: "trash")
+            }
+        }
+        .onTapGesture {
+            navigateToDetail = true
+        }
+        .background(
+            NavigationLink(isActive: $navigateToDetail,
+                         destination: { MentorshipRequestDetailView(request: request) },
+                         label: { EmptyView() })
+        )
+        .alert("Delete Request", isPresented: $showDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                if let userId = authService.currentUser?.id,
+                   let requestId = request.id {
+                    print("🗑️ Delete button tapped")
+                    print("UserID: \(userId)")
+                    print("RequestID: \(requestId)")
+                    viewModel.deleteMentorshipRequest(userId: userId, requestId: requestId)
+                } else {
+                    print("❌ Missing userId or requestId")
+                    print("UserID: \(authService.currentUser?.id ?? "nil")")
+                    print("RequestID: \(request.id ?? "nil")")
+                }
+            }
+        } message: {
+            Text("Are you sure you want to delete this mentorship request? This action cannot be undone.")
+        }
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.errorMessage)
+        }
+    }
+}
+
+struct StatusBadge: View {
+    let status: String
+    
+    var statusColor: Color {
+        switch status.lowercased() {
+        case "pending": return .orange
+        case "accepted": return .green
+        case "completed": return .blue
+        default: return .gray
+        }
+    }
+    
+    var body: some View {
+        Text(status)
+            .font(.caption)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(statusColor.opacity(0.2))
+            .foregroundColor(statusColor)
+            .cornerRadius(8)
+    }
+}
+
+struct EmptyRequestsView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "doc.text.questionmark")
+                .font(.system(size: 40))
+                .foregroundColor(.gray)
+            
+            Text("No mentorship requests yet")
+                .font(.headline)
+            
+            Text("Start your learning journey by requesting mentorship below")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}

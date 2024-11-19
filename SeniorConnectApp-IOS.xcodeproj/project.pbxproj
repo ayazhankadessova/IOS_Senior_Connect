@@ -33,6 +33,7 @@
 		BCFB80222CEB3834000E3574 /* MyProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80212CEB3834000E3574 /* MyProfileView.swift */; };
 		BCFB80242CEB9C64000E3574 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80232CEB9C64000E3574 /* HelpView.swift */; };
 		BCFB80262CEBA38F000E3574 /* MentorshipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80252CEBA38F000E3574 /* MentorshipService.swift */; };
+		BCFB80282CEC7E52000E3574 /* HelpModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80272CEC7E51000E3574 /* HelpModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2018,6 +2019,7 @@
 		BCFB80212CEB3834000E3574 /* MyProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileView.swift; sourceTree = "<group>"; };
 		BCFB80232CEB9C64000E3574 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		BCFB80252CEBA38F000E3574 /* MentorshipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentorshipService.swift; sourceTree = "<group>"; };
+		BCFB80272CEC7E51000E3574 /* HelpModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2127,6 +2129,7 @@
 				BC0F9ECA2CE4874D0016DD1C /* AuthModels.swift */,
 				BC0F9ED82CE4ECE10016DD1C /* LessonModels.swift */,
 				BCFB801D2CE84962000E3574 /* EventModels.swift */,
+				BCFB80272CEC7E51000E3574 /* HelpModels.swift */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -6953,6 +6956,7 @@
 				BC0F9E9C2CE486CB0016DD1C /* ContentView.swift in Sources */,
 				BC0F9ED92CE4ECE20016DD1C /* LessonModels.swift in Sources */,
 				BCFB801E2CE84962000E3574 /* EventModels.swift in Sources */,
+				BCFB80282CEC7E52000E3574 /* HelpModels.swift in Sources */,
 				BC0F9ECB2CE4874D0016DD1C /* AuthModels.swift in Sources */,
 				BC0F9EC72CE487270016DD1C /* AuthenticationManager.swift in Sources */,
 				BC0F9EDF2CE4EF150016DD1C /* TutorialViewModel.swift in Sources */,

@@ -94,6 +94,7 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [x] can see reqs
 - [x] Mentor help request
 - [ ] Make help view look better
+- [ ] Add delete mentorship request
 
 
 
