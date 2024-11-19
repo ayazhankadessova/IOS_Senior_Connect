@@ -202,38 +202,3 @@ struct SaveForLaterResponse: Codable {
 struct MentorHelpResponse: Codable {
     let progress: CategoryLessonProgress
 }
-
-//struct ProgressResponse: Codable {
-//    let progress: Progress
-//    let overallProgress: OverallProgress
-//    
-//    struct Progress: Codable {
-//        let lessonId: String
-//        let completed: Bool
-//        let lastAccessed: Date
-//        let completedSteps: [String]
-//        let completedActionItems: [String]
-//        let quizScores: [QuizScore]
-//        let savedForLater: Bool
-//        let needsMentorHelp: Bool
-//        let mentorNotes: String?
-//    }
-//    
-//    struct QuizScore: Codable {
-//        let score: Int
-//        let attemptDate: Date
-//    }
-//}
-
-//struct OverallProgress: Codable {
-//    let totalLessonsCompleted: Int
-//    let averageQuizScore: Double
-//    let lastActivityDate: Date
-//}
-//
-//struct BatchProgress: Codable {
-//    let category: String
-//    let lessonId: String
-//    let completedSteps: [String]
-//    let completedItems: [String]
-//}

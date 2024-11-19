@@ -34,6 +34,7 @@
 		BCFB80242CEB9C64000E3574 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80232CEB9C64000E3574 /* HelpView.swift */; };
 		BCFB80262CEBA38F000E3574 /* MentorshipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80252CEBA38F000E3574 /* MentorshipService.swift */; };
 		BCFB80282CEC7E52000E3574 /* HelpModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80272CEC7E51000E3574 /* HelpModels.swift */; };
+		BCFB802A2CEC8BFE000E3574 /* TutorialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80292CEC8BFE000E3574 /* TutorialsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2020,6 +2021,7 @@
 		BCFB80232CEB9C64000E3574 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		BCFB80252CEBA38F000E3574 /* MentorshipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentorshipService.swift; sourceTree = "<group>"; };
 		BCFB80272CEC7E51000E3574 /* HelpModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpModels.swift; sourceTree = "<group>"; };
+		BCFB80292CEC8BFE000E3574 /* TutorialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2093,6 +2095,7 @@
 				BCFB80212CEB3834000E3574 /* MyProfileView.swift */,
 				BCFB80232CEB9C64000E3574 /* HelpView.swift */,
 				BCFB80252CEBA38F000E3574 /* MentorshipService.swift */,
+				BCFB80292CEC8BFE000E3574 /* TutorialsView.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -6962,6 +6965,7 @@
 				BC0F9EDF2CE4EF150016DD1C /* TutorialViewModel.swift in Sources */,
 				BC0F9ED62CE4AA4C0016DD1C /* LessonService.swift in Sources */,
 				BC0F9E9A2CE486CB0016DD1C /* SeniorConnectApp_IOSApp.swift in Sources */,
+				BCFB802A2CEC8BFE000E3574 /* TutorialsView.swift in Sources */,
 				BC0F9EC92CE4873A0016DD1C /* HomeView.swift in Sources */,
 				BC0F9EDD2CE4EE700016DD1C /* Helpers.swift in Sources */,
 				BC0F9EC52CE486EB0016DD1C /* MainTabView.swift in Sources */,

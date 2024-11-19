@@ -4,8 +4,6 @@ import SwiftUI
 struct HelpView: View {
     @StateObject private var viewModel = HelpViewModel()
     @EnvironmentObject var authService: AuthService
-    
-    // State for expandable FAQs
     @State private var expandedFAQ: String? = nil
     
     let faqs = [
