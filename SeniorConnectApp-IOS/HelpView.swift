@@ -84,53 +84,53 @@ struct MentorshipRequestDetailView: View {
             Text("Status: \(request.status)")
                 .foregroundColor(.secondary)
             
-            Section(header: Text("Messages")) {
-                if request.messages.isEmpty {
-                    Text("No messages yet.")
-                } else {
-                    ForEach(request.messages, id: \.timestamp) { message in
-                        MessageView(message: message)
-                    }
-                }
-            }
+//            Section(header: Text("Messages")) {
+//                if request.messages.isEmpty {
+//                    Text("No messages yet.")
+//                } else {
+//                    ForEach(request.messages, id: \.timestamp) { message in
+//                        MessageView(message: message)
+//                    }
+//                }
+//            }
             
-            Spacer()
-            
-            HStack {
-                TextField("Enter your message", text: $viewModel.newMessage)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                
-                Button(action: {
-                    
-                    if let userId = authService.currentUser?.id {
-                        viewModel.sendMessage(userId: userId)
-                    }
-                }) {
-                    Image(systemName: "paperplane")
-                }
-            }
+//            Spacer()
+//            
+//            HStack {
+//                TextField("Enter your message", text: $viewModel.newMessage)
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//                
+//                Button(action: {
+//                    
+//                    if let userId = authService.currentUser?.id {
+//                        viewModel.sendMessage(userId: userId)
+//                    }
+//                }) {
+//                    Image(systemName: "paperplane")
+//                }
+//            }
         }
         .padding()
         .navigationTitle("Request Details")
     }
 }
 
-struct MessageView: View {
-    let message: MentorshipMessage
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(message.content)
-                .padding(10)
-                .background(Color.blue.opacity(0.2))
-                .cornerRadius(10)
-            
-            Text(message.timestamp)
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-    }
-}
+//struct MessageView: View {
+//    let message: MentorshipMessage
+//    
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 8) {
+//            Text(message.content)
+//                .padding(10)
+//                .background(Color.blue.opacity(0.2))
+//                .cornerRadius(10)
+//            
+//            Text(message.timestamp)
+//                .font(.caption)
+//                .foregroundColor(.secondary)
+//        }
+//    }
+//}
 
 class MentorshipRequestDetailViewModel: ObservableObject {
     @Published var newMessage = ""
@@ -142,28 +142,39 @@ class MentorshipRequestDetailViewModel: ObservableObject {
         self.request = request
     }
     
-    func sendMessage(userId: String) {
-        mentorshipService.sendMessage(requestId: request.id!, content: newMessage, userId: userId) { [weak self] result in
-            switch result {
-            case .success:
-                print("Message sent successfully")
-                self?.newMessage = ""
-            case .failure(let error):
-                print("Error sending message: \(error)")
-            }
-        }
-    }
+//    func sendMessage(userId: String) {
+//        mentorshipService.sendMessage(requestId: request.id!, content: newMessage, userId: userId) { [weak self] result in
+//            switch result {
+//            case .success:
+//                print("Message sent successfully")
+//                self?.newMessage = ""
+//            case .failure(let error):
+//                print("Error sending message: \(error)")
+//            }
+//        }
+//    }
 }
 
 struct RequestMentorshipView: View {
     @StateObject private var viewModel = RequestMentorshipViewModel()
     @EnvironmentObject var authService: AuthService
     
+    let skillLevels = ["Beginner", "Intermediate", "Advanced"]
+    
     var body: some View {
         Form {
             Section(header: Text("Request Mentorship")) {
-                TextField("Enter your question or topic", text: $viewModel.topic)
+                TextField("Topic", text: $viewModel.topic)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                TextEditor(text: $viewModel.description)
+                    .frame(height: 100)
+                
+                Picker("Skill Level", selection: $viewModel.skillLevel) {
+                    ForEach(skillLevels, id: \.self) { level in
+                        Text(level).tag(level)
+                    }
+                }
                 
                 Button(action: {
                     if let userId = authService.currentUser?.id {
@@ -201,16 +212,26 @@ class HelpViewModel: ObservableObject {
 
 class RequestMentorshipViewModel: ObservableObject {
     @Published var topic = ""
+    @Published var description = ""
+    @Published var skillLevel = "Beginner"
     private let mentorshipService = MentorshipService()
     
     func submitMentorshipRequest(userId: String) {
-        mentorshipService.createMentorshipRequest(topic: topic, userId: userId) { [weak self] result in
-            switch result {
-            case .success:
-                print("Mentorship request submitted successfully")
-                self?.topic = ""
-            case .failure(let error):
-                print("Error submitting mentorship request: \(error)")
+        mentorshipService.createMentorshipRequest(
+            topic: topic,
+            description: description,
+            skillLevel: skillLevel,
+            userId: userId
+        ) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("Mentorship request submitted successfully")
+                    self?.topic = ""
+                    self?.description = ""
+                case .failure(let error):
+                    print("Error submitting mentorship request: \(error)")
+                }
             }
         }
     }
