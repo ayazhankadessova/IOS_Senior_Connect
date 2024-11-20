@@ -83,7 +83,6 @@ struct HelpView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                     }
-                    .padding(.top)
                 }
                 .padding()
             }
@@ -147,12 +146,9 @@ struct RequestMentorshipView: View {
     @State private var formData = MentorRequestFormData()
     @State private var showForm = true
     
-    // Initialize ViewModel with userId from authService
     @StateObject private var viewModel: RequestMentorshipViewModel
     
     init() {
-        // Create the StateObject with a default value
-        // We'll update it in onAppear if needed
         _viewModel = StateObject(wrappedValue: RequestMentorshipViewModel(userId: ""))
     }
     
@@ -165,8 +161,10 @@ struct RequestMentorshipView: View {
             subtitle: "Fill in the details below to connect with a mentor who can help guide you on your journey.",
             isStandalone: true
         )
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(false)
+        .ignoresSafeArea(edges: .top)
         .onAppear {
-            // Update the ViewModel with the correct userId if needed
             if let userId = authService.currentUser?.id {
                 viewModel.updateUserId(userId)
             }
@@ -185,20 +183,33 @@ class HelpViewModel: ObservableObject {
     @Published var errorMessage = ""
     private let mentorshipService = MentorshipService()
     
+//    func fetchMentorshipRequests(userId: String) {
+//        mentorshipService.getUserMentorshipRequests(userId: userId) { [weak self] result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let requests):
+//                    self?.mentorshipRequests = requests
+//                case .failure(let error):
+//                    self?.showError = true
+//                    self?.errorMessage = error.localizedDescription
+//                    print("Error fetching mentorship requests: \(error)")
+//                }
+//            }
+//        }
+//    }
+    
     func fetchMentorshipRequests(userId: String) {
-        mentorshipService.getUserMentorshipRequests(userId: userId) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let requests):
-                    self?.mentorshipRequests = requests
-                case .failure(let error):
-                    self?.showError = true
-                    self?.errorMessage = error.localizedDescription
-                    print("Error fetching mentorship requests: \(error)")
+            mentorshipService.getUserMentorshipRequests(userId: userId) { [weak self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let requests):
+                        self?.mentorshipRequests = requests
+                    case .failure(let error):
+                        print("Error fetching mentorship requests: \(error)")
+                    }
                 }
             }
         }
-    }
     
     func deleteMentorshipRequest(userId: String, requestId: String) {
         print("🚀 Starting delete request")
@@ -229,30 +240,74 @@ class HelpViewModel: ObservableObject {
     }
 }
 
-class RequestMentorshipViewModel: ObservableObject, MentorRequestFormDelegate {
-    private let mentorshipService = MentorshipService()
-    var userId: String
-    @Published var showError = false
-    @Published var showSuccess = false
-    @Published var errorMessage = ""
+class RequestMentorshipViewModel: MentorRequestFormDelegate, ObservableObject {
+    private var userId: String
+    private let mentorshipService: MentorshipService
     
-    init(userId: String) {
+    init(userId: String, mentorshipService: MentorshipService = MentorshipService()) {
         self.userId = userId
+        self.mentorshipService = mentorshipService
+    }
+    
+    func updateUserId(_ newId: String) {
+        userId = newId
     }
     
     func submitMentorRequest(formData: MentorRequestFormData) async throws {
+            return try await withCheckedThrowingContinuation { continuation in
+                mentorshipService.createMentorshipRequest(
+                    topic: formData.topic,
+                    description: formData.description,
+                    phoneNumber: formData.phoneNumber,
+                    skillLevel: formData.skillLevel,
+                    userId: userId
+                ) { result in
+                    switch result {
+                    case .success(let request):
+                        print("Successfully created mentorship request: \(request)")
+                        // Post notification after successful creation
+                        DispatchQueue.main.async {
+                            NotificationCenter.default.post(name: .mentorshipRequestCreated, object: nil)
+                        }
+                        continuation.resume()
+                    case .failure(let error):
+                        print("Failed to create mentorship request: \(error)")
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
+    
+    func requestMentorHelp(
+        for lesson: Lesson,
+        notes: String?,
+        phoneNumber: String,
+        skillLevel: String
+    ) async throws {
+        print("Creating mentorship request for lesson: \(lesson.title)")
+        
+        let description = """
+        Lesson: \(lesson.title)
+        Lesson ID: \(lesson.lessonId)
+        
+        Additional Notes:
+        \(notes ?? "No additional notes provided")
+        """
+        
         return try await withCheckedThrowingContinuation { continuation in
             mentorshipService.createMentorshipRequest(
-                topic: formData.topic,
-                description: formData.description,
-                phoneNumber: formData.phoneNumber,
-                skillLevel: formData.skillLevel,
+                topic: "Help with: \(lesson.title)",
+                description: description,
+                phoneNumber: phoneNumber,
+                skillLevel: skillLevel,
                 userId: userId
             ) { result in
                 switch result {
                 case .success(let request):
+                    print("Successfully created mentorship request: \(request)")
                     continuation.resume()
                 case .failure(let error):
+                    print("Failed to create mentorship request: \(error)")
                     continuation.resume(throwing: error)
                 }
             }
@@ -260,14 +315,14 @@ class RequestMentorshipViewModel: ObservableObject, MentorRequestFormDelegate {
     }
 }
 
-extension RequestMentorshipViewModel {
-    func updateUserId(_ newUserId: String) {
-        // Only update if the userId is empty (initial state)
-        if userId.isEmpty {
-            userId = newUserId
-        }
-    }
-}
+//extension RequestMentorshipViewModel {
+//    func updateUserId(_ newUserId: String) {
+//        // Only update if the userId is empty (initial state)
+//        if userId.isEmpty {
+//            userId = newUserId
+//        }
+//    }
+//}
 
 extension Notification.Name {
     static let mentorshipRequestCreated = Notification.Name("mentorshipRequestCreated")

@@ -296,20 +296,7 @@ enum LearningCategory: String {
     }
 }
 
-//extension User {
-//    func getProgress(for category: LearningCategory) -> [CategoryLessonProgress] {
-//        switch category {
-//        case .smartphoneBasics:
-//            return progress.smartphoneBasics
-//        case .digitalLiteracy:
-//            return progress.digitalLiteracy
-//        case .socialMedia:
-//            return progress.socialMedia
-//        case .iot:
-//            return progress.iot
-//        }
-//    }
-//}
+
 
 struct LessonDetailView: View {
     @EnvironmentObject var authService: AuthService
@@ -346,260 +333,139 @@ struct LessonDetailView: View {
         case "iot":
             return user.progress.iot.first { $0.lessonId == lessonId }
         default:
-            return nil // or handle the unexpected case as needed
+            return nil
         }
-        
     }
     
     init(lesson: Lesson, progress: CategoryLessonProgress? = nil, userId: String, tutorialDetailView: TutorialDetailView) {
-            self._lesson = State(initialValue: lesson)
-            self._progress = State(initialValue: progress)
-            self.userId = userId
-            self._viewModel = StateObject(wrappedValue: TutorialViewModel(userId: userId))
-            self.tutorialDetailView = tutorialDetailView
-        }
+        self._lesson = State(initialValue: lesson)
+        self._progress = State(initialValue: progress)
+        self.userId = userId
+        self._viewModel = StateObject(wrappedValue: TutorialViewModel(userId: userId))
+        self.tutorialDetailView = tutorialDetailView
+    }
     
     private func saveProgress() async {
-            do {
-                viewModel.tutorialDetailView = tutorialDetailView
-                try await viewModel.updateBatchProgress(
-                    category: lesson.category,
-                    lessonId: lesson.lessonId,
-                    completedSteps: Array(completedSteps),
-                    completedStepActions: completedStepActions
-                )
-                
-                await MainActor.run {
-                    hasUnsavedChanges = false
-                    showingSaveConfirmation = true
-                    progress = findLessonProgress(lessonId: lesson.lessonId, category: lesson.category)
-                }
+        do {
+            viewModel.tutorialDetailView = tutorialDetailView
+            try await viewModel.updateBatchProgress(
+                category: lesson.category,
+                lessonId: lesson.lessonId,
+                completedSteps: Array(completedSteps),
+                completedStepActions: completedStepActions
+            )
+            
+            await MainActor.run {
+                hasUnsavedChanges = false
+                showingSaveConfirmation = true
+                progress = findLessonProgress(lessonId: lesson.lessonId, category: lesson.category)
             }
-        catch {
-                // ... error handling ...
-            }
+        } catch {
+            errorMessage = "Failed to save progress: \(error.localizedDescription)"
+            showError = true
         }
+    }
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Video Section
-                if let videoUrl = lesson.videoUrl {
-                    VideoThumbnailView(videoUrl: videoUrl) {
-                        showingVideo = true
+            VStack(alignment: .leading, spacing: 24) {
+                // Header Section with Video
+                Group {
+                    if let videoUrl = lesson.videoUrl {
+                        VideoThumbnailView(videoUrl: videoUrl) {
+                            showingVideo = true
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                
+                // Progress Card
+                if let currentProgress = progress {
+                    ProgressCard(progress: currentProgress)
+                }
+                
+                // Description Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("About this lesson")
+                        .font(.headline)
+                    
+                    Text(lesson.description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+                
+                // Steps Section
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Lesson Steps")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    
+                    ForEach(lesson.steps) { step in
+                        StepActionItems(
+                            step: step,
+                            onItemComplete: { item in
+                                handleStepCompletion(step: step, item: item)
+                            },
+                            completedSteps: $completedSteps,
+                            completedStepActions: $completedStepActions,
+                            currentStepId: step.stepId
+                        )
+                    }
+                }
+                
+                // Action Buttons Section
+                VStack(spacing: 16) {
+                    if hasUnsavedChanges {
+                        SaveProgressButton {
+                            Task {
+                                await saveProgress()
+                            }
+                        }
+                    }
+                    
+                    HStack(spacing: 20) {
+                        SaveForLaterButton(
+                            isSaved: lesson.savedForLater,
+                            action: {
+                                Task {
+                                    do {
+                                        try await viewModel.saveForLater(lesson)
+                                        showingSaveConfirmation = true
+                                    } catch {
+                                        errorMessage = "Failed to save for later: \(error.localizedDescription)"
+                                        showError = true
+                                    }
+                                }
+                            }
+                        )
+                        
+                        RequestHelpButton {
+                            viewModel.setCurrentLesson(lesson)
+                            formData = MentorRequestFormData()
+                            showingMentorRequestSheet = true
+                        }
                     }
                     .padding(.horizontal)
                 }
-                
-                Divider().padding(.horizontal)
-                
-                // Curr progress Section
-                if let currentProgress = progress {
-                    VStack(alignment: .leading, spacing: 8) {
-                        if currentProgress.completed {
-                            Label("Lesson Completed", systemImage: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                        }
-                        
-                        Text("Last accessed: \(currentProgress.lastAccessed.formatted())")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                    }
-                    .padding()
-                    .background(Color(.systemBackground))
-                    .cornerRadius(10)
-                }
-                
-                Divider().padding(.horizontal)
-                
-                // Steps Section
-                ForEach(lesson.steps) { step in
-                    StepActionItems(
-                        step: step,
-                        onItemComplete: { item in
-                            let identifier = StepActionIdentifier(
-                                stepId: step.stepId,
-                                actionItemId: item.itemId
-                            )
-                            
-                            if completedStepActions.contains(identifier) {
-                                completedStepActions.remove(identifier)
-                                print("Removed action: \(identifier)")
-                            } else {
-                                completedStepActions.insert(identifier)
-                                print("Added action: \(identifier)")
-                            }
-                            
-                            let stepCompleted = step.actionItems
-                                .filter { $0.isRequired }
-                                .allSatisfy { actionItem in
-                                    completedStepActions.contains(
-                                        StepActionIdentifier(
-                                            stepId: step.stepId,
-                                            actionItemId: actionItem.itemId
-                                        )
-                                    )
-                                }
-                            
-                            if stepCompleted {
-                                completedSteps.insert(step.stepId)
-                                print("Completed step: \(step.stepId)")
-                            } else {
-                                completedSteps.remove(step.stepId)
-                                print("Uncompleted step: \(step.stepId)")
-                            }
-                            
-                            hasUnsavedChanges = true
-                        },
-                        completedSteps: $completedSteps,
-                        completedStepActions: $completedStepActions,
-                        currentStepId: step.stepId
-                    )
-                }
-                
-                // Save Progress Button
-                if hasUnsavedChanges {
-                    Button {
-                        Task {
-                            await saveProgress()
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.up.doc")
-                            Text("Save Progress")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
-                    .padding()
-                }
-                
-                // Action Buttons
-                HStack {
-                    Button {
-                        Task {
-                            do {
-                                try await viewModel.saveForLater(lesson)
-                                showingSaveConfirmation = true
-                            } catch {
-                                errorMessage = "Failed to save for later: \(error.localizedDescription)"
-                                print(lesson)
-                                showError = true
-                            }
-                        }
-                    } label: {
-                        Label(
-                            lesson.savedForLater ? "Saved" : "Save for Later",
-                            systemImage: lesson.savedForLater ? "bookmark.fill" : "bookmark"
-                        )
-                    }
-                    
-                    Spacer()
-                    
-                    Button {
-                        viewModel.setCurrentLesson(lesson)
-                        formData = MentorRequestFormData() // Reset form data
-                        showingMentorRequestSheet = true
-                    } label: {
-                        Label("Request Help", systemImage: "person.fill.questionmark")
-                    }
-                    .sheet(isPresented: $showingMentorRequestSheet) {
-                        MentorRequestForm(
-                            formData: $formData,
-                            showForm: $showingMentorRequestSheet,
-                            delegate: viewModel,
-                            title: "Request Help",
-                            subtitle: "Request help with: \(lesson.title)",
-                            isStandalone: false // This is not a standalone form
-                        )
-                    }
-                }
-                .sheet(isPresented: $showingMentorRequestSheet) {
-                    NavigationView {
-                        Form {
-                            Section(header: Text("Contact Information")) {
-                                TextField("Phone Number", text: $phoneNumber)
-                                    .keyboardType(.phonePad)
-                                    .textContentType(.telephoneNumber)
-                            }
-                            
-                            Section(header: Text("Skill Level")) {
-                                Picker("Your current skill level", selection: $skillLevel) {
-                                    Text("Beginner").tag("Beginner")
-                                    Text("Intermediate").tag("Intermediate")
-                                    Text("Advanced").tag("Advanced")
-                                }
-                            }
-                            
-                            Section(header: Text("Additional Notes")) {
-                                TextEditor(text: $mentorNotes)
-                                    .frame(height: 100)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.gray.opacity(0.2))
-                                    )
-                            }
-                            
-                            Section {
-                                Button(action: {
-                                    if !phoneNumber.isEmpty {
-                                        Task {
-                                            do {
-                                                try await viewModel.requestMentorHelp(
-                                                    for: lesson,
-                                                    notes: mentorNotes,
-                                                    phoneNumber: phoneNumber,
-                                                    skillLevel: skillLevel
-                                                )
-                                                mentorRequestSuccessful = true
-                                                showingMentorRequestSheet = false
-                                            } catch {
-                                                errorMessage = "Failed to request help: \(error.localizedDescription)"
-                                                showError = true
-                                            }
-                                        }
-                                    } else {
-                                        errorMessage = "Please enter your phone number"
-                                        showError = true
-                                    }
-                                }) {
-                                    Text("Submit Request")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.blue)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                }
-                            }
-                        }
-                        .navigationTitle("Request Mentor Help")
-                        .navigationBarItems(
-                            trailing: Button("Cancel") {
-                                showingMentorRequestSheet = false
-                            }
-                        )
-                    }
-                }
-                .alert("Success", isPresented: $mentorRequestSuccessful) {
-                    Button("OK", role: .cancel) { }
-                } message: {
-                    Text("Your mentor request has been submitted successfully!")
-                }
-                .alert("Error", isPresented: $showError) {
-                    Button("OK", role: .cancel) { }
-                } message: {
-                    Text(errorMessage)
-                }
+                .padding(.vertical)
             }
-            .padding()
+            .padding(.vertical)
         }
         .navigationTitle(lesson.title)
+        .background(Color(.systemGroupedBackground))
         .sheet(isPresented: $showingVideo) {
             VideoPlayerView(videoURL: lesson.videoUrl ?? "")
+        }
+        .sheet(isPresented: $showingMentorRequestSheet) {
+            MentorRequestForm(
+                formData: $formData,
+                showForm: $showingMentorRequestSheet,
+                delegate: viewModel,
+                title: "Request Help",
+                subtitle: "Request help with: \(lesson.title)",
+                isStandalone: false
+            )
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
@@ -607,20 +473,59 @@ struct LessonDetailView: View {
             Text(errorMessage)
         }
         .onAppear {
-            // Initialize from current progress
-            if let currentProgress = progress {
-                print("Initializing from current progress: \(currentProgress)")
-                completedSteps = Set(currentProgress.completedSteps)
-                let stepActions = currentProgress.stepProgress.flatMap { stepProgress in
-                    stepProgress.completedActionItems.map { actionId in
-                        StepActionIdentifier(
-                            stepId: stepProgress.stepId,
-                            actionItemId: actionId
-                        )
-                    }
-                }
-                completedStepActions = Set(stepActions)
+            initializeProgress()
+        }
+    }
+    
+    private func handleStepCompletion(step: Step, item: ActionItem) {
+        let identifier = StepActionIdentifier(
+            stepId: step.stepId,
+            actionItemId: item.itemId
+        )
+        
+        if completedStepActions.contains(identifier) {
+            completedStepActions.remove(identifier)
+            print("Removed action: \(identifier)")
+        } else {
+            completedStepActions.insert(identifier)
+            print("Added action: \(identifier)")
+        }
+        
+        let stepCompleted = step.actionItems
+            .filter { $0.isRequired }
+            .allSatisfy { actionItem in
+                completedStepActions.contains(
+                    StepActionIdentifier(
+                        stepId: step.stepId,
+                        actionItemId: actionItem.itemId
+                    )
+                )
             }
+        
+        if stepCompleted {
+            completedSteps.insert(step.stepId)
+            print("Completed step: \(step.stepId)")
+        } else {
+            completedSteps.remove(step.stepId)
+            print("Uncompleted step: \(step.stepId)")
+        }
+        
+        hasUnsavedChanges = true
+    }
+    
+    private func initializeProgress() {
+        if let currentProgress = progress {
+            print("Initializing from current progress: \(currentProgress)")
+            completedSteps = Set(currentProgress.completedSteps)
+            let stepActions = currentProgress.stepProgress.flatMap { stepProgress in
+                stepProgress.completedActionItems.map { actionId in
+                    StepActionIdentifier(
+                        stepId: stepProgress.stepId,
+                        actionItemId: actionId
+                    )
+                }
+            }
+            completedStepActions = Set(stepActions)
         }
     }
 }

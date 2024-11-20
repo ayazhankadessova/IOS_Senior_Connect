@@ -21,15 +21,14 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 - Important
 
 ## Middle: Functionality
-- [ ] EventRow cant show properly Registered/Not -> fix how it is updated
+- [ ] EventRow cant show properly Registered/Not -> fix how it is updated => [Low Priority]
 
 ## Easy: Functionality
 - [x] When u just open Events page => show some events
-- [ ] Add pagination
-- [ ] Helper for category colors -> make more reusable bc in EventRow & in EventDetail
+- [ ] Add pagination => [Infinite scroll] => [Low priority]
 
 ## Easy: Better UI
-- [ ] Lesson description -> align left
+- [x] Lesson description -> align left
 
 ## Idk: from logs:
 
@@ -37,8 +36,12 @@ https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1d
 nw_read_request_report [C3] Receive failed with error "Operation timed out"
 
 ```
-- When scroll events:
+- When scroll events [High Priority] => no need to init stuff for every events
 ```
+🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a258fd
+🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a258fe
+🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a258ff
+🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a25900
 🔄 Updating AuthService in EventDetailViewModel
 🔄 Updating AuthService in EventDetailViewModel
 🔄 Updating AuthService in EventDetailViewModel
@@ -97,14 +100,18 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [x] Make help view look better
 - [x] Add delete mentorship request
 
-## 19 nov
+## 20 nov
 - [x] Added DigitalLiteracy courses 
 - [x] add placeholder image for youtube vids
-- [ ] remove second help request sheet
-- [ ] overall Progress to home page
+- [x] remove second help request sheet
+- [x] overall Progress to home page
+- [x] remove unnecessary padding from help request
 - [ ] put events code to diff folders for better readability
-- [ ] update after added help req 
+- [x] update after added help req 
+- [ ] Helper for category colors -> make more reusable bc in EventRow & in EventDetail
 - [ ] Add quizes to digitalLiteracy
+- [ ] When scroll events [High Priority] => no need to init stuff for every events
+
 
 
 

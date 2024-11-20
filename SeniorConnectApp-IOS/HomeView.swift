@@ -17,6 +17,11 @@ struct HomeView: View {
     @AppStorage("hasCompletedInitialTutorial") private var hasCompletedInitialTutorial = false
     @State private var showingTutorialPrompt = false
     
+    private var completedLessons: Int {
+            // Safely unwrap the optional value with a default of 0
+            authService.currentUser?.overallProgress.totalLessonsCompleted ?? 0
+        }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -28,7 +33,7 @@ struct HomeView: View {
                     UpcomingEventsPreview()
                     
                     // Tutorial Progress
-                    TutorialProgressCard()
+                    TutorialProgressCard(totalLessons: 10,completedLessons: completedLessons)
                 }
                 .padding()
             }

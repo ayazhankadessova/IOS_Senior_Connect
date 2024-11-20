@@ -90,7 +90,16 @@ struct TutorialPromptView: View {
 
 // MARK: - Tutorial Progress Card
 struct TutorialProgressCard: View {
-    @State private var progress: Double = 0.3 // Example progress
+    let totalLessons: Int
+    let completedLessons: Int // Added to track completed lessons
+    let totalTopics: Int = 10 // Total number of topics
+    let completedTopics: Int = 3 // Completed topics
+    
+    // Calculate progress as a Float between 0 and 1
+    private var progress: Float {
+        guard totalLessons > 0 else { return 0 }
+        return Float(completedLessons) / Float(totalLessons)
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -105,7 +114,7 @@ struct TutorialProgressCard: View {
                 Text("\(Int(progress * 100))% Complete")
                     .foregroundColor(.secondary)
                 Spacer()
-                Text("3/10 Topics")
+                Text("\(completedTopics)/\(totalTopics) Topics")
                     .foregroundColor(.secondary)
             }
             .font(.system(size: 16))
@@ -395,7 +404,7 @@ struct StatusBadge: View {
 struct EmptyRequestsView: View {
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: "doc.text.questionmark")
+            Image(systemName: "questionmark.square.dashed")
                 .font(.system(size: 40))
                 .foregroundColor(.gray)
             
@@ -626,5 +635,89 @@ struct LoadingIndicator: View {
             Spacer()
         }
         .padding()
+    }
+}
+
+// Supporting Views
+struct ProgressCard: View {
+    let progress: CategoryLessonProgress
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if progress.completed {
+                Label("Lesson Completed", systemImage: "checkmark.circle.fill")
+                    .font(.headline)
+                    .foregroundColor(.green)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Last accessed:")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                Text(progress.lastAccessed.formatted())
+                    .font(.subheadline)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+        .padding(.horizontal)
+    }
+}
+
+struct SaveProgressButton: View {
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: "arrow.up.doc.fill")
+                Text("Save Progress")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+        .padding(.horizontal)
+    }
+}
+
+struct SaveForLaterButton: View {
+    let isSaved: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                Text(isSaved ? "Saved" : "Save for Later")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(.secondarySystemGroupedBackground))
+            .foregroundColor(.primary)
+            .cornerRadius(12)
+        }
+    }
+}
+
+struct RequestHelpButton: View {
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: "person.fill.questionmark")
+                Text("Request Help")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(.secondarySystemGroupedBackground))
+            .foregroundColor(.primary)
+            .cornerRadius(12)
+        }
     }
 }
