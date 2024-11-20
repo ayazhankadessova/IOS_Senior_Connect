@@ -81,11 +81,8 @@ struct EventsView: View {
                     .padding(.horizontal, 16)
                 }
                 
-                // Events List
-                if viewModel.isLoading {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
+                if viewModel.isLoading && viewModel.events.isEmpty {
+                    LoadingIndicator()
                 } else if viewModel.events.isEmpty {
                     ContentUnavailableView {
                         Label("No Events", systemImage: "calendar.badge.exclamationmark")
@@ -93,29 +90,34 @@ struct EventsView: View {
                         Text("There are no events matching your criteria.")
                     }
                 } else {
-                    List {
-                        ForEach(viewModel.events) { event in
-                            NavigationLink(destination: EventDetailView(event: event)) {
-                                EventRow(event: event)
-                            }
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        }
-                        
-                        if viewModel.hasMoreEvents {
-                            ProgressView()
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(viewModel.events) { event in
+                                NavigationLink(destination: EventDetailView(event: event)) {
+                                    EventRow(event: event)
+                                }
                                 .onAppear {
-                                    Task {
-                                        await viewModel.loadMoreEvents()
+                                    // Check if this is one of the last items
+                                    if event.id == viewModel.events.last?.id {
+                                        Task {
+                                            await viewModel.loadMoreEventsIfNeeded()
+                                        }
                                     }
                                 }
+                            }
+                            
+                            if viewModel.isLoadingMore {
+                                LoadingIndicator()
+                            }
                         }
+                        .padding()
                     }
-                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Events")
+            .refreshable {
+                await viewModel.refreshEvents()
+            }
             .onChange(of: isOnlineOnly) { oldValue, newValue in
                 Task {
                     await viewModel.applyFilters(category: selectedCategory, isOnline: newValue)
@@ -249,6 +251,7 @@ struct EventPreviewRow: View {
 class EventViewModel: ObservableObject {
     @Published private(set) var events: [Event] = []
     @Published private(set) var isLoading = false
+    @Published private(set) var isLoadingMore = false
     @Published private(set) var hasMoreEvents = false
     @Published var error: Error?
     
@@ -256,14 +259,53 @@ class EventViewModel: ObservableObject {
     private let limit = 10
     private var currentQuery = EventQuery()
     private let eventService = EventService()
+    private var isFetching = false
     private var authService: AuthService
     
     let categories = ["educational", "social", "health", "technology", "entertainment", "other"]
-    var upcomingEvents : [Event]
+    var upcomingEvents: [Event]
     
     init(authService: AuthService) {
         self.authService = authService
-        upcomingEvents = []
+        self.upcomingEvents = []
+    }
+    
+    @MainActor
+    func loadMoreEventsIfNeeded() async {
+        guard !isFetching && hasMoreEvents && !isLoadingMore else {
+            print("⚠️ Skip loading more: isFetching=\(isFetching), hasMore=\(hasMoreEvents), isLoadingMore=\(isLoadingMore)")
+            return
+        }
+        
+        print("\n📜 Loading more events - Page \(currentPage + 1)")
+        debugCurrentState()
+        
+        isLoadingMore = true
+        isFetching = true
+        
+        do {
+            currentPage += 1
+            currentQuery.page = currentPage
+            
+            print("🔄 Fetching page \(currentPage)")
+            let response = try await eventService.fetchEvents(query: currentQuery)
+            
+            // Append new events and update status
+            events.append(contentsOf: response.events)
+            hasMoreEvents = response.pagination.hasNextPage
+            
+            print("✅ Loaded \(response.events.count) more events")
+            print("📊 Total events: \(events.count)")
+            print("⏭️ Has more: \(hasMoreEvents)")
+        } catch {
+            print("❌ Error loading more events: \(error.localizedDescription)")
+            self.error = error
+            currentPage -= 1
+        }
+        
+        isLoadingMore = false
+        isFetching = false
+        debugCurrentState()
     }
     
     @MainActor
@@ -277,7 +319,15 @@ class EventViewModel: ObservableObject {
         isLoading = true
         
         do {
-            let query = EventQuery(limit: 3)
+            let query = EventQuery(page: 1)
+            
+            // Log cache status
+            if eventService.isCached(for: query) {
+                print("📦 Found cached upcoming events")
+            } else {
+                print("🌐 Fetching fresh upcoming events")
+            }
+            
             let response = try await eventService.fetchEvents(query: query)
             upcomingEvents = response.events
             print("✅ Successfully fetched \(upcomingEvents.count) upcoming events")
@@ -290,15 +340,36 @@ class EventViewModel: ObservableObject {
     }
     
     @MainActor
+    func debugCurrentState() {
+        print("\n=== VIEWMODEL STATE ===")
+        print("📑 Current Page: \(currentPage)")
+        print("🔢 Events Count: \(events.count)")
+        print("⏭️ Has More Events: \(hasMoreEvents)")
+        print("🔄 Is Loading: \(isLoading)")
+        print("📥 Is Loading More: \(isLoadingMore)")
+        print("🔒 Is Fetching: \(isFetching)")
+        print("🔑 Current Query: \(currentQuery.cacheKey)")
+        print("📦 Is Cached: \(eventService.isCached(for: currentQuery))")
+        print("====================\n")
+    }
+    
+    @MainActor
     func fetchEvents() async {
+        print("\n🔍 Starting fetchEvents")
+        debugCurrentState()
+        
         isLoading = true
         currentPage = 1
+        currentQuery.page = currentPage
         
         do {
             let response = try await eventService.fetchEvents(query: currentQuery)
             events = response.events
             hasMoreEvents = response.pagination.hasNextPage
+            print("✅ Fetch complete")
+            debugCurrentState()
         } catch {
+            print("❌ Error in fetchEvents: \(error.localizedDescription)")
             self.error = error
         }
         
@@ -318,6 +389,13 @@ class EventViewModel: ObservableObject {
         currentQuery.page = currentPage
         
         do {
+            // Check if next page is cached
+            if eventService.isCached(for: currentQuery) {
+                print("📦 Using cached data for page \(currentPage)")
+            } else {
+                print("🌐 Fetching fresh data for page \(currentPage)")
+            }
+            
             let response = try await eventService.fetchEvents(query: currentQuery)
             events.append(contentsOf: response.events)
             hasMoreEvents = response.pagination.hasNextPage
@@ -335,69 +413,80 @@ class EventViewModel: ObservableObject {
     func searchEvents(query: String) async {
         print("🔍 Searching events with query: \(query)")
         currentQuery.search = query
+        // Clear cache for search queries to ensure fresh results
+        eventService.clearCache(for: currentQuery)
         await fetchEvents()
     }
     
     @MainActor
     func applyFilters(category: String? = nil, isOnline: Bool? = nil, city: String? = nil) async {
         print("🔧 Applying filters - category: \(category ?? "nil"), isOnline: \(String(describing: isOnline)), city: \(city ?? "nil")")
+        
+        // Check if filters have changed
+        let filtersChanged = category != currentQuery.category ||
+                           isOnline != currentQuery.isOnline ||
+                           city != currentQuery.city
+        
         currentQuery.category = category
         currentQuery.isOnline = isOnline
         currentQuery.city = city
+        
+        // Clear cache if filters changed
+        if filtersChanged {
+            print("🧹 Clearing cache due to filter changes")
+            eventService.clearCache(for: currentQuery)
+        }
+        
         await fetchEvents()
     }
     
     @MainActor
     func refreshEvents() async {
-        print("🔄 Refreshing events...")
+        print("\n🔄 Refreshing events...")
+        debugCurrentState()
+        
         isLoading = true
         currentPage = 1
+        isFetching = true
         
         do {
-            // Clear cache before fetching fresh data
-            eventService.clearCache()
+            // Clear cache for current query
+            print("🧹 Clearing cache for refresh")
+            eventService.clearCache(for: currentQuery)
             
-            // Create a new query to ensure fresh data
-            let freshQuery = EventQuery(
-                page: currentPage,
-                limit: limit,
-                search: currentQuery.search,
-                category: currentQuery.category,
-                isOnline: currentQuery.isOnline,
-                city: currentQuery.city
-            )
+            currentQuery.page = currentPage
+            let response = try await eventService.fetchEvents(query: currentQuery)
             
-            let response = try await eventService.fetchEvents(query: freshQuery)
             events = response.events
             hasMoreEvents = response.pagination.hasNextPage
-            print("✅ Successfully refreshed events")
+            
+            print("✅ Refresh complete")
+            debugCurrentState()
         } catch {
             print("❌ Error refreshing events: \(error.localizedDescription)")
             self.error = error
         }
         
         isLoading = false
+        isFetching = false
     }
     
-    // Helper method to check if there are any events
-    var hasEvents: Bool {
-        !events.isEmpty
+    // Helper method to check if current query is cached
+    func isCurrentQueryCached() -> Bool {
+        eventService.isCached(for: currentQuery)
     }
     
-    // Helper method to get events count
-    var eventsCount: Int {
-        events.count
+    // Helper method to clear all cache
+    func clearAllCache() {
+        print("🧹 Clearing all event cache")
+        eventService.clearCache()
     }
     
-    // Helper method to get the current page number
-    var currentPageNumber: Int {
-        currentPage
-    }
-    
-    // Helper method to check if we're on the first page
-    var isFirstPage: Bool {
-        currentPage == 1
-    }
+    // Existing helper methods
+    var hasEvents: Bool { !events.isEmpty }
+    var eventsCount: Int { events.count }
+    var currentPageNumber: Int { currentPage }
+    var isFirstPage: Bool { currentPage == 1 }
 }
 
 struct EventDetailView: View {

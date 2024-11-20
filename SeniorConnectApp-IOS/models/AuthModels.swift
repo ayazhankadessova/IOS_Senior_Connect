@@ -20,6 +20,21 @@ struct AuthUser: Codable {
     }
 }
 
+extension AuthUser {
+    func getProgress(for category: LearningCategory) -> [CategoryLessonProgress] {
+        switch category {
+        case .smartphoneBasics:
+            return progress.smartphoneBasics
+        case .digitalLiteracy:
+            return progress.digitalLiteracy
+        case .socialMedia:
+            return progress.socialMedia
+        case .iot:
+            return progress.iot
+        }
+    }
+}
+
 // Extensions for date handling
 //extension AuthUser.LessonProgress {
 //    var lastAccessedDate: Date? {

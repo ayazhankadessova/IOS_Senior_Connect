@@ -87,7 +87,7 @@ class TutorialViewModel: ObservableObject, MentorRequestFormDelegate {
     func saveForLater(_ lesson: Lesson) async throws {
         print("Saving lesson for later: \(lesson.lessonId)")
         let requestData = [
-            "category": "smartphoneBasics",
+            "category": lesson.category,
             "lessonId": lesson.lessonId
         ]
         

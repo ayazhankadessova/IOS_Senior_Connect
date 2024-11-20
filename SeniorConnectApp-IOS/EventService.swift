@@ -33,27 +33,44 @@ class EventService {
     
                 
     func fetchEvents(query: EventQuery) async throws -> PaginatedResponse<Event> {
-        // When refreshing, skip cache and fetch from network
-        if query.page == 1 {
-            print("📥 Fetching fresh data from network")
-            return try await fetchEventsFromNetwork(query: query)
-        }
-        
         let cacheKey = query.cacheKey
         
-        // Check cache for subsequent pages
-        if let cached = eventCache[cacheKey],
-           cached.isValid,
-           let response = cached.data as? PaginatedResponse<Event> {
-            print("📦 Using cached events data")
-            return response
+        print("\n=== FETCH EVENTS START ===")
+        print("📝 Query: page=\(query.page), limit=\(query.limit)")
+        print("🔑 Cache Key: \(cacheKey)")
+        
+        // Check cache first
+        if let cached = eventCache[cacheKey] {
+            print("📦 Found cache entry")
+            print("⏰ Cache Age: \(Date().timeIntervalSince(cached.timestamp)) seconds")
+            print("✅ Cache Valid: \(cached.isValid)")
+            
+            if cached.isValid {
+                if let response = cached.data as? PaginatedResponse<Event> {
+                    print("🎯 Cache Hit: Returning \(response.events.count) cached events")
+                    debugCache()
+                    return response
+                } else {
+                    print("⚠️ Cache type mismatch")
+                }
+            } else {
+                print("⚠️ Cache expired")
+                eventCache.removeValue(forKey: cacheKey)
+            }
+        } else {
+            print("📭 No cache entry found")
         }
         
-        // If not in cache, fetch from network
+        // Fetch from network
+        print("🌐 Fetching from network")
         let response = try await fetchEventsFromNetwork(query: query)
         
         // Store in cache
         eventCache[cacheKey] = CacheEntry(data: response, timestamp: Date())
+        print("💾 Stored in cache: \(response.events.count) events")
+        debugCache()
+        
+        print("=== FETCH EVENTS END ===\n")
         return response
     }
     
@@ -254,4 +271,30 @@ class EventService {
             let events = try JSONDecoder.authDecoder.decode([Event].self, from: data)
             return events
         }
+}
+
+extension EventService {
+    private func debugCache() {
+        print("\n=== CACHE STATUS ===")
+        print("Total cached entries: \(eventCache.count)")
+        for (key, entry) in eventCache {
+            print("📍 Cache Key: \(key)")
+            print("  ⏰ Timestamp: \(entry.timestamp)")
+            print("  ✅ Valid: \(entry.isValid)")
+            if let response = entry.data as? PaginatedResponse<Event> {
+                print("  📦 Cached events count: \(response.events.count)")
+            }
+        }
+        print("==================\n")
+    }
+    
+    private func logCacheOperation(_ operation: String, for key: String) {
+        print("\n🔍 Cache Operation: \(operation)")
+        print("📝 Cache Key: \(key)")
+        if let entry = eventCache[key] {
+            print("⏰ Entry Age: \(Date().timeIntervalSince(entry.timestamp)) seconds")
+            print("✅ Entry Valid: \(entry.isValid)")
+        }
+        print("📦 Total Cache Entries: \(eventCache.count)\n")
+    }
 }

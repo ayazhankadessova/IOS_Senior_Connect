@@ -1,10 +1,3 @@
-//
-//  TutorialsView.swift
-//  SeniorConnectApp-IOS
-//
-//  Created by Аяжан on 19/11/2024.
-//
-
 import Foundation
 import SwiftUI
 import SwiftData
@@ -60,7 +53,7 @@ struct TutorialDetailView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     
-    private func findLessonProgress(for lessonId: String) -> CategoryLessonProgress? {
+    private func findLessonProgress(lessonId: String, category: String) -> CategoryLessonProgress? {
         return lessonService.lessonsProgress[lessonId]
     }
     
@@ -90,9 +83,9 @@ struct TutorialDetailView: View {
                 CategoryHeaderView(category: category)
                 
                 // Overall Progress section
-                if let overall = lessonService.overallProgress {
-                    OverallProgressView(progress: overall)
-                }
+//                if let overall = lessonService.overallProgress {
+//                    OverallProgressView(progress: overall)
+//                }
                 
                 // Lessons section
                 if lessonService.isLoading {
@@ -100,7 +93,7 @@ struct TutorialDetailView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if !lessonService.lessons.isEmpty {
                     ForEach(lessonService.lessons) { lesson in
-                        let progress = findLessonProgress(for: lesson.lessonId)
+                        let progress = findLessonProgress(lessonId: lesson.lessonId, category: lesson.category)
                         NavigationLink {
                             LessonDetailView(
                                 lesson: lesson,
@@ -287,6 +280,37 @@ struct VideoPlayerView: View {
     }
 }
 
+enum LearningCategory: String {
+    case smartphoneBasics = "smartphoneBasics"
+    case digitalLiteracy = "digitalLiteracy"
+    case socialMedia = "socialMedia"
+    case iot = "iot"
+    
+    var displayName: String {
+        switch self {
+        case .smartphoneBasics: return "Smartphone Basics"
+        case .digitalLiteracy: return "Digital Literacy"
+        case .socialMedia: return "Social Media"
+        case .iot: return "Internet of Things"
+        }
+    }
+}
+
+//extension User {
+//    func getProgress(for category: LearningCategory) -> [CategoryLessonProgress] {
+//        switch category {
+//        case .smartphoneBasics:
+//            return progress.smartphoneBasics
+//        case .digitalLiteracy:
+//            return progress.digitalLiteracy
+//        case .socialMedia:
+//            return progress.socialMedia
+//        case .iot:
+//            return progress.iot
+//        }
+//    }
+//}
+
 struct LessonDetailView: View {
     @EnvironmentObject var authService: AuthService
     @State var lesson: Lesson
@@ -309,9 +333,22 @@ struct LessonDetailView: View {
     let tutorialDetailView: TutorialDetailView
     @State private var formData = MentorRequestFormData()
     
-    private func findLessonProgress(for lessonId: String) -> CategoryLessonProgress? {
+    private func findLessonProgress(lessonId: String, category: String) -> CategoryLessonProgress? {
         guard let user = authService.currentUser else { return nil }
-        return user.progress.smartphoneBasics.first { $0.lessonId == lessonId }
+        
+        switch category {
+        case "smartphoneBasics":
+            return user.progress.smartphoneBasics.first { $0.lessonId == lessonId }
+        case "digitalLiteracy":
+            return user.progress.digitalLiteracy.first { $0.lessonId == lessonId }
+        case "socialMedia":
+            return user.progress.socialMedia.first { $0.lessonId == lessonId }
+        case "iot":
+            return user.progress.iot.first { $0.lessonId == lessonId }
+        default:
+            return nil // or handle the unexpected case as needed
+        }
+        
     }
     
     init(lesson: Lesson, progress: CategoryLessonProgress? = nil, userId: String, tutorialDetailView: TutorialDetailView) {
@@ -326,7 +363,7 @@ struct LessonDetailView: View {
             do {
                 viewModel.tutorialDetailView = tutorialDetailView
                 try await viewModel.updateBatchProgress(
-                    category: "smartphoneBasics",
+                    category: lesson.category,
                     lessonId: lesson.lessonId,
                     completedSteps: Array(completedSteps),
                     completedStepActions: completedStepActions
@@ -335,7 +372,7 @@ struct LessonDetailView: View {
                 await MainActor.run {
                     hasUnsavedChanges = false
                     showingSaveConfirmation = true
-                    progress = findLessonProgress(for: lesson.lessonId)
+                    progress = findLessonProgress(lessonId: lesson.lessonId, category: lesson.category)
                 }
             }
         catch {
@@ -347,22 +384,11 @@ struct LessonDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Video Section
-                Button {
-                    showingVideo = true
-                } label: {
-                    ZStack {
-                        if let _ = lesson.videoUrl {
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(height: 200)
-                                .overlay(
-                                    Image(systemName: "play.circle.fill")
-                                        .font(.system(size: 50))
-                                        .foregroundColor(.blue)
-                                )
-                        }
+                if let videoUrl = lesson.videoUrl {
+                    VideoThumbnailView(videoUrl: videoUrl) {
+                        showingVideo = true
                     }
-                    .cornerRadius(12)
+                    .padding(.horizontal)
                 }
                 
                 Divider().padding(.horizontal)

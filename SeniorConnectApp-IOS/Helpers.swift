@@ -565,3 +565,66 @@ struct MentorRequestForm: View {
             }
         }
 }
+
+struct VideoThumbnailView: View {
+    let videoUrl: String?
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            ZStack {
+                // Background Image/Placeholder
+                Image(systemName: "video.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 200)
+                    .padding(40)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6))
+                    )
+                
+                // Overlay with play button and gradient
+                ZStack {
+                    // Semi-transparent gradient overlay
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.black.opacity(0.3),
+                            Color.black.opacity(0.1)
+                        ]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    
+                    // Play Button
+                    Circle()
+                        .fill(Color.white)
+                        .opacity(0.9)
+                        .frame(width: 70, height: 70)
+                        .overlay(
+                            Image(systemName: "play.fill")
+                                .foregroundColor(.blue)
+                                .font(.title)
+                                .offset(x: 2) // Small offset to visually center the play icon
+                        )
+                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+        }
+    }
+}
+
+struct LoadingIndicator: View {
+    var body: some View {
+        HStack {
+            Spacer()
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle())
+            Spacer()
+        }
+        .padding()
+    }
+}

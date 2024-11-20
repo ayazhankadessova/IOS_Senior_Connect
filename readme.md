@@ -97,6 +97,16 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [x] Make help view look better
 - [x] Add delete mentorship request
 
+## 19 nov
+- [x] Added DigitalLiteracy courses 
+- [x] add placeholder image for youtube vids
+- [ ] remove second help request sheet
+- [ ] overall Progress to home page
+- [ ] put events code to diff folders for better readability
+- [ ] update after added help req 
+- [ ] Add quizes to digitalLiteracy
+
+
 
 
 ## Backlog:

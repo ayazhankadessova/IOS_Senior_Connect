@@ -86,18 +86,42 @@ struct EventQuery {
     var isOnline: Bool?
     var city: String?
     
-    // Add description property
+//    // Add description property
+//    var cacheKey: String {
+//        let components = [
+//            "page_\(page)",
+//            "limit_\(limit)",
+//            search.map { "search_\($0)" },
+//            category.map { "category_\($0)" },
+//            isOnline.map { "online_\($0)" },
+//            city.map { "city_\($0)" }
+//        ].compactMap { $0 }
+//        
+//        return components.joined(separator: "_")
+//    }
+}
+
+extension EventQuery {
     var cacheKey: String {
-        let components = [
-            "page_\(page)",
-            "limit_\(limit)",
-            search.map { "search_\($0)" },
-            category.map { "category_\($0)" },
-            isOnline.map { "online_\($0)" },
-            city.map { "city_\($0)" }
-        ].compactMap { $0 }
+        var components = [
+            "page=\(page)",
+            "limit=\(limit)"
+        ]
         
-        return components.joined(separator: "_")
+        if let search = search {
+            components.append("search=\(search)")
+        }
+        if let category = category {
+            components.append("category=\(category)")
+        }
+        if let isOnline = isOnline {
+            components.append("isOnline=\(isOnline)")
+        }
+        if let city = city {
+            components.append("city=\(city)")
+        }
+        
+        return components.sorted().joined(separator: "&")
     }
 }
 
