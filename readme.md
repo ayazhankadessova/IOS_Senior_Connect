@@ -113,8 +113,8 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [ ] When scroll events [High Priority] => no need to init stuff for every events
 
 
-
-
+## 21 nov
+- add Social media lessons
 
 ## Backlog:
 - [ ] Your Learning Progress for every category ?

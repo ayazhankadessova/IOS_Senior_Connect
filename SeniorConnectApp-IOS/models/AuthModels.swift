@@ -119,8 +119,8 @@ struct UserProgress: Codable {
     let iot: [CategoryLessonProgress]
 }
 
-struct StepProgress: Codable, Identifiable {
-    let id: String
+struct StepProgress: Codable {
+    let id: String?  // Make id optional since it's not always returned
     let stepId: String
     let completedActionItems: [String]
     
@@ -128,5 +128,17 @@ struct StepProgress: Codable, Identifiable {
         case id = "_id"
         case stepId
         case completedActionItems
+    }
+    
+    // Add init to handle missing id
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Try to decode id, but use nil if not present
+        self.id = try container.decodeIfPresent(String.self, forKey: .id)
+        
+        // Decode required fields
+        self.stepId = try container.decode(String.self, forKey: .stepId)
+        self.completedActionItems = try container.decode([String].self, forKey: .completedActionItems)
     }
 }

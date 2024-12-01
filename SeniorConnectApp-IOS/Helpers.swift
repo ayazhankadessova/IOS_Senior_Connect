@@ -721,3 +721,60 @@ struct RequestHelpButton: View {
         }
     }
 }
+
+struct QuizScoreCard: View {
+    let score: Int
+    let totalQuestions: Int
+    
+    var percentage: Double {
+        Double(score) / Double(totalQuestions) * 100
+    }
+    
+    var scoreColor: Color {
+        if percentage >= 80 {
+            return .green
+        } else if percentage >= 60 {
+            return .orange
+        } else {
+            return .red
+        }
+    }
+    
+    var scoreMessage: String {
+        if percentage >= 80 {
+            return "Great job! You've mastered this lesson!"
+        } else if percentage >= 60 {
+            return "Good progress! Keep practicing to improve."
+        } else {
+            return "Review the lesson material and try again."
+        }
+    }
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            Circle()
+                .fill(scoreColor.opacity(0.2))
+                .frame(width: 50, height: 50)
+                .overlay(
+                    Text("\(Int(percentage))%")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(scoreColor)
+                )
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Score: \(score)/\(totalQuestions)")
+                    .font(.headline)
+                    .foregroundColor(scoreColor)
+                
+                Text(scoreMessage)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+    }
+}

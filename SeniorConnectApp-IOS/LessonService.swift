@@ -28,33 +28,44 @@ class LessonService: ObservableObject {
     func fetchLessons(category: String, userId: String) async throws {
         isLoading = true
         error = nil
-        
-//        if category == "Smartphone Basics" -> change to smartphoneBasics 
-        
+                
         do {
-            
             let apiCategoryName = convertDisplayNameToApiName(category)
             print("Fetching progress for category: \(apiCategoryName)")
             
-            let progressResponse = try await fetchUserProgress(userId: userId, category: apiCategoryName)
-            let lessons = try await fetchLessonsFromAPI(category: apiCategoryName)
+            async let progressResponseFuture = fetchUserProgress(userId: userId, category: apiCategoryName)
+            async let lessonsFuture = fetchLessonsFromAPI(category: apiCategoryName)
+            
+            let (progressResponse, lessons) = try await (progressResponseFuture, lessonsFuture)
             
             // Update all state together
-            self.lessons = lessons
-            self.lessonsProgress = Dictionary(
+            let newProgress = Dictionary(
                 uniqueKeysWithValues: progressResponse.categoryProgress.map {
                     ($0.lessonId, $0)
                 }
             )
+            
+            // Print debug info
+            print("Current lessonsProgress count: \(self.lessonsProgress.count)")
+            print("New progress count: \(newProgress.count)")
+            
+            // Update state
+            self.lessons = lessons
+            self.lessonsProgress = newProgress
             self.overallProgress = progressResponse.overallProgress
             
-            print("Updated lessonsProgress: \(self.lessonsProgress)")
+            // Print updated progress for each lesson
+            print("Updated Lesson Progress:")
+            for (lessonId, progress) in self.lessonsProgress {
+                print("\(lessonId): completed=\(progress.completed), steps=\(progress.completedSteps.count)")
+            }
+            
         } catch {
             self.error = error
             throw error
         }
-        self.isLoading = false
         
+        self.isLoading = false
     }
         
     private func fetchLessonsFromAPI(category: String) async throws -> [Lesson] {

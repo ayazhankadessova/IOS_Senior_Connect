@@ -35,6 +35,7 @@
 		BCFB80262CEBA38F000E3574 /* MentorshipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80252CEBA38F000E3574 /* MentorshipService.swift */; };
 		BCFB80282CEC7E52000E3574 /* HelpModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80272CEC7E51000E3574 /* HelpModels.swift */; };
 		BCFB802A2CEC8BFE000E3574 /* TutorialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB80292CEC8BFE000E3574 /* TutorialsView.swift */; };
+		BCFB802C2CEDD907000E3574 /* Quiz.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCFB802B2CEDD907000E3574 /* Quiz.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2022,6 +2023,7 @@
 		BCFB80252CEBA38F000E3574 /* MentorshipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentorshipService.swift; sourceTree = "<group>"; };
 		BCFB80272CEC7E51000E3574 /* HelpModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpModels.swift; sourceTree = "<group>"; };
 		BCFB80292CEC8BFE000E3574 /* TutorialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialsView.swift; sourceTree = "<group>"; };
+		BCFB802B2CEDD907000E3574 /* Quiz.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quiz.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2096,6 +2098,7 @@
 				BCFB80232CEB9C64000E3574 /* HelpView.swift */,
 				BCFB80252CEBA38F000E3574 /* MentorshipService.swift */,
 				BCFB80292CEC8BFE000E3574 /* TutorialsView.swift */,
+				BCFB802B2CEDD907000E3574 /* Quiz.swift */,
 			);
 			path = "SeniorConnectApp-IOS";
 			sourceTree = "<group>";
@@ -6973,6 +6976,7 @@
 				BCFB80242CEB9C64000E3574 /* HelpView.swift in Sources */,
 				BCFB77362CE73292000E3574 /* drafts.swift in Sources */,
 				BC0F9EDB2CE4ED710016DD1C /* EventsView.swift in Sources */,
+				BCFB802C2CEDD907000E3574 /* Quiz.swift in Sources */,
 				BCFB80222CEB3834000E3574 /* MyProfileView.swift in Sources */,
 				BC0F9ECD2CE4875F0016DD1C /* AuthService.swift in Sources */,
 				BCFB80262CEBA38F000E3574 /* MentorshipService.swift in Sources */,

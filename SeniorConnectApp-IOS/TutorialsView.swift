@@ -320,6 +320,9 @@ struct LessonDetailView: View {
     let tutorialDetailView: TutorialDetailView
     @State private var formData = MentorRequestFormData()
     
+    @State private var showingQuiz = false
+    @State private var quizScore: Int?
+    
     private func findLessonProgress(lessonId: String, category: String) -> CategoryLessonProgress? {
         guard let user = authService.currentUser else { return nil }
         
@@ -338,14 +341,18 @@ struct LessonDetailView: View {
     }
     
     init(lesson: Lesson, progress: CategoryLessonProgress? = nil, userId: String, tutorialDetailView: TutorialDetailView) {
-        self._lesson = State(initialValue: lesson)
-        self._progress = State(initialValue: progress)
-        self.userId = userId
-        self._viewModel = StateObject(wrappedValue: TutorialViewModel(userId: userId))
-        self.tutorialDetailView = tutorialDetailView
-    }
+            self._lesson = State(initialValue: lesson)
+            self._progress = State(initialValue: progress)
+            self.userId = userId
+            self._viewModel = StateObject(wrappedValue: TutorialViewModel(userId: userId))
+            self.tutorialDetailView = tutorialDetailView
+        }
     
     private func saveProgress() async {
+        print("💾 Starting progress save")
+        print("📋 Completed steps: \(completedSteps)")
+        print("📋 Completed actions: \(completedStepActions)")
+        
         do {
             viewModel.tutorialDetailView = tutorialDetailView
             try await viewModel.updateBatchProgress(
@@ -359,12 +366,58 @@ struct LessonDetailView: View {
                 hasUnsavedChanges = false
                 showingSaveConfirmation = true
                 progress = findLessonProgress(lessonId: lesson.lessonId, category: lesson.category)
+                print("✅ Progress updated: \(String(describing: progress))")
             }
         } catch {
+            print("❌ Save failed: \(error)")
             errorMessage = "Failed to save progress: \(error.localizedDescription)"
             showError = true
         }
     }
+    
+    private var lastQuizScore: Int? {
+            if let progress = progress, !progress.quizScores.isEmpty {
+                return progress.quizScores[0].score
+            }
+            return nil
+        }
+    
+    @ViewBuilder
+   private var quizScoreSection: some View {
+       // First check current quiz score
+       if let currentScore = quizScore {
+           QuizScoreCard(
+               score: currentScore,
+               totalQuestions: lesson.quiz.count
+           )
+           .padding(.horizontal)
+       }
+       // If no current score, check last saved score
+       else if let lastScore = lastQuizScore {
+           QuizScoreCard(
+               score: lastScore,
+               totalQuestions: lesson.quiz.count
+           )
+           .padding(.horizontal)
+       }
+   }
+    
+    private func saveQuizScore(_ score: Int) async {
+            do {
+                try await viewModel.updateQuizScore(lessonId: lesson.lessonId, score: score, category: lesson.category)
+                await MainActor.run {
+                    quizScore = score
+//                    lastQuizScore = score
+                    // Refresh progress to get updated quiz scores
+                    progress = findLessonProgress(lessonId: lesson.lessonId, category: lesson.category)
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to save quiz score: \(error.localizedDescription)"
+                    showError = true
+                }
+            }
+        }
     
     var body: some View {
         ScrollView {
@@ -449,6 +502,32 @@ struct LessonDetailView: View {
                     .padding(.horizontal)
                 }
                 .padding(.vertical)
+                
+                
+                // Quiz Section
+               VStack(alignment: .leading, spacing: 16) {
+                   
+                   Text("Lesson Quiz")
+                       .font(.headline)
+                       .padding(.horizontal)
+                   
+                   quizScoreSection
+                   
+                   Button {
+                       showingQuiz = true
+                   } label: {
+                       HStack {
+                           Image(systemName: "doc.text.fill")
+                           Text(quizScore == nil ? "Take Quiz" : "Retake Quiz")
+                       }
+                       .frame(maxWidth: .infinity)
+                       .padding()
+                       .background(Color.blue)
+                       .foregroundColor(.white)
+                       .cornerRadius(12)
+                   }
+                   .padding(.horizontal)
+               }
             }
             .padding(.vertical)
         }
@@ -467,6 +546,25 @@ struct LessonDetailView: View {
                 isStandalone: false
             )
         }
+        .sheet(isPresented: $showingQuiz) {
+                    NavigationView {
+                        QuizView(questions: lesson.quiz) { score in
+                            Task {
+                                await saveQuizScore(score)
+                            }
+                            showingQuiz = false
+                        }
+                        .navigationTitle("Lesson Quiz")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button("Close") {
+                                    showingQuiz = false
+                                }
+                            }
+                        }
+                    }
+                }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -478,6 +576,11 @@ struct LessonDetailView: View {
     }
     
     private func handleStepCompletion(step: Step, item: ActionItem) {
+        print("🔄 Processing step completion:")
+        print("  Step ID: \(step.stepId)")
+        print("  Item ID: \(item.itemId)")
+        print("  Required: \(item.isRequired)")
+        
         let identifier = StepActionIdentifier(
             stepId: step.stepId,
             actionItemId: item.itemId
@@ -485,30 +588,37 @@ struct LessonDetailView: View {
         
         if completedStepActions.contains(identifier) {
             completedStepActions.remove(identifier)
-            print("Removed action: \(identifier)")
+            print("❌ Removed action: \(identifier)")
         } else {
             completedStepActions.insert(identifier)
-            print("Added action: \(identifier)")
+            print("✅ Added action: \(identifier)")
         }
         
-        let stepCompleted = step.actionItems
-            .filter { $0.isRequired }
-            .allSatisfy { actionItem in
-                completedStepActions.contains(
-                    StepActionIdentifier(
-                        stepId: step.stepId,
-                        actionItemId: actionItem.itemId
-                    )
+        // Check step completion
+        let allRequiredStepItems = step.actionItems.filter { $0.isRequired }
+        print("📋 Required items for step \(step.stepId): \(allRequiredStepItems.count)")
+        
+        let completedRequiredItems = allRequiredStepItems.filter { actionItem in
+            completedStepActions.contains(
+                StepActionIdentifier(
+                    stepId: step.stepId,
+                    actionItemId: actionItem.itemId
                 )
-            }
+            )
+        }
+        print("✓ Completed required items: \(completedRequiredItems.count)")
+        
+        let stepCompleted = completedRequiredItems.count == allRequiredStepItems.count
         
         if stepCompleted {
             completedSteps.insert(step.stepId)
-            print("Completed step: \(step.stepId)")
+            print("🎉 Completed step: \(step.stepId)")
         } else {
             completedSteps.remove(step.stepId)
-            print("Uncompleted step: \(step.stepId)")
+            print("📝 Uncompleted step: \(step.stepId)")
         }
+        
+        print("📊 Current completed steps: \(completedSteps)")
         
         hasUnsavedChanges = true
     }

@@ -12,10 +12,10 @@ import SwiftUI
 // Models for server response
 
 struct CategoryLessonProgress: Codable, Identifiable {
-    let id: String
+    let id: String?  // Make id optional since it's not always returned
     let lessonId: String
     let completed: Bool
-    let lastAccessed: Date  // This will now be properly decoded
+    let lastAccessed: Date
     let completedSteps: [String]
     let stepProgress: [StepProgress]
     let quizScores: [QuizScore]
@@ -33,8 +33,29 @@ struct CategoryLessonProgress: Codable, Identifiable {
         case savedForLater
         case needsMentorHelp
     }
+    
+    // Add init to handle missing id
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Try to decode id, but use nil if not present
+        self.id = try container.decodeIfPresent(String.self, forKey: .id)
+        
+        // Decode required fields
+        self.lessonId = try container.decode(String.self, forKey: .lessonId)
+        self.completed = try container.decode(Bool.self, forKey: .completed)
+        self.lastAccessed = try container.decode(Date.self, forKey: .lastAccessed)
+        self.completedSteps = try container.decode([String].self, forKey: .completedSteps)
+        self.stepProgress = try container.decode([StepProgress].self, forKey: .stepProgress)
+        self.quizScores = try container.decode([QuizScore].self, forKey: .quizScores)
+        self.savedForLater = try container.decode(Bool.self, forKey: .savedForLater)
+        self.needsMentorHelp = try container.decode(Bool.self, forKey: .needsMentorHelp)
+    }
 }
 
+struct SimpleResponse: Codable {
+    let success: Bool
+}
 
 struct CategoryProgressResponse: Codable {
     let categoryProgress: [CategoryLessonProgress]
@@ -122,7 +143,7 @@ struct Lesson: Codable, Identifiable {
     let videoUrl: String?
     let order: Int
     let steps: [Step]
-    let quiz: [Quiz]
+    let quiz: [QuizQuestion]
     let v: Int
     
     // UI state properties (not from backend)
@@ -219,10 +240,6 @@ struct TutorialCategory: Identifiable {
             lessons: nil
         )
     ]
-}
-
-struct Quiz: Codable {
-    // Add quiz properties if needed
 }
 
 struct ActionButton: View {
