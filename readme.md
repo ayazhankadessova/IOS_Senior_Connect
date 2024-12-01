@@ -123,7 +123,13 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [ ] Add image for vidoes, can we show them in the same page ?
 - [ ] Remove help requested and remove save for later (just change backebd) -> Easy 
 
+## Dec 1
 
+- [ ] contact button
+- [ ] IOT section
+- [ ] deploy the backend, fix the baseurls
+- [ ] add placeholder picture
+- [ ] Your learning progress fix 
 
 
 Ideas:

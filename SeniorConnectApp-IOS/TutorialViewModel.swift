@@ -78,7 +78,7 @@ class TutorialViewModel: ObservableObject, MentorRequestFormDelegate {
             }
             
             // Add a longer delay to ensure backend processing is complete
-            try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+            try await Task.sleep(nanoseconds: 4_500_000_000) // 1.5 seconds
             
             // Refresh in multiple steps
             if let parentView = tutorialDetailView {
