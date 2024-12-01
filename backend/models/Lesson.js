@@ -1,3 +1,5 @@
+// models/Lesson.js
+
 const mongoose = require('mongoose')
 const { CATEGORIES } = require('../config/constants')
 
@@ -40,4 +42,13 @@ const lessonSchema = new mongoose.Schema({
   ],
 })
 
-module.exports = mongoose.model('Lesson', lessonSchema)
+// Use a try-catch block to handle potential model registration issues
+let Lesson
+try {
+  // Check if model is already registered
+  Lesson = mongoose.models.Lesson || mongoose.model('Lesson', lessonSchema)
+} catch (error) {
+  Lesson = mongoose.model('Lesson', lessonSchema)
+}
+
+module.exports = Lesson

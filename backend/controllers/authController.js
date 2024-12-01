@@ -44,6 +44,7 @@ exports.signup = async (req, res) => {
         averageQuizScore: parseFloat((0.0).toFixed(2)),
         lastActivityDate: new Date(),
       },
+      registeredEvents: [],
     })
 
     await user.save()
@@ -54,5 +55,3 @@ exports.signup = async (req, res) => {
     res.status(400).json({ error: error.message })
   }
 }
-
-// Additional controllers follow similar pattern...

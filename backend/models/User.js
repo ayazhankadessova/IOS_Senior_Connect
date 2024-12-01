@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema({
     },
     lastActivityDate: Date,
   },
+  registeredEvents: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event',
+    },
+  ],
 })
 
 userSchema.set('toJSON', {

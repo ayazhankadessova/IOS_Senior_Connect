@@ -6,5 +6,7 @@ router.post('/batch', progressController.updateBatchProgress)
 router.get('/:category', progressController.getCategoryProgress)
 router.post('/save-for-later', progressController.saveForLater)
 router.post('/request-mentor', progressController.requestMentorHelp)
+router.post('/quiz-score', progressController.updateQuizScore)
+router.get('/total-completed', progressController.getTotalLessonsCompleted) // New route
 
 module.exports = router
