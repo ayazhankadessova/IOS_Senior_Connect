@@ -1,127 +1,177 @@
-## How can we teach Digiotal Literacy to Elderly? (Brainstorming)
+# SeniorConnect 🌟
 
+A comprehensive digital learning platform designed specifically for seniors, helping them navigate the modern digital world with confidence. The platform offers structured courses, mentorship opportunities, and community events to make technology accessible and engaging for elderly users.
 
-1. Smartphone Basics 
-* 3-4 lessons on how to use a smartphone 
-2. Digital Literacy 
-* Watch 5 videos on how to stay safe online / Read 
-* Answer quiz questions
-* I will get videos from Youtube : https://www.youtube.com/watch?v=_LElWqXi7Ag&list=PLcetZ6gSk9682A7ZAZq2s9IqB-y8Ng63e
-3. Social Media 
-* Learn how to use WhatsApp/Facebook/Instagram basics 
-* Quizes
-4. IoT Integration 
-* Integrate IoT functionalities to enhance user experience, such as smart home device controls
-and health monitoring tools. Provide interactive tutorials on how to use common IoT devices, tailored for seniors.
+## Backend
 
-https://www.youtube.com/watch?v=D_jj5Awr0Kc&list=PLPRhQEDGqsFC4NL3DiYpPVnDKP9o1dnTw&index=2
+- Feel free to check out routes and use the backend, there is a rate limiter, so don't flood with requests
 
-## Bugs:
+https://senior-connect-app-backend.vercel.app/api/events
 
-- Important
+## Features 🚀
 
-## Middle: Functionality
-- [ ] EventRow cant show properly Registered/Not -> fix how it is updated => [Low Priority]
+### Learning Modules
 
-## Easy: Functionality
-- [x] When u just open Events page => show some events
-- [ ] Add pagination => [Infinite scroll] => [Low priority]
+- **Smartphone Basics** 📱
 
-## Easy: Better UI
-- [x] Lesson description -> align left
+  - Interactive lessons on smartphone fundamentals
+  - Step-by-step guides for common tasks
+  - Practical exercises and tutorials
 
-## Idk: from logs:
+- **Digital Literacy** 💻
 
+  - Online safety and security awareness
+  - Interactive video lessons
+  - Knowledge verification quizzes
+  - Curated content from trusted sources
+
+- **Social Media Navigation** 🤝
+
+  - WhatsApp, Facebook, and Instagram basics
+  - Safe social media practices
+  - Interactive tutorials
+  - Progress tracking
+
+- **IoT & Smart Devices** 🏠
+  - Smart home device tutorials
+  - Health monitoring tools integration
+  - Interactive device control lessons
+  - Practical applications
+
+### Additional Features
+
+- **Mentorship System** 👥
+
+  - Request help from experienced mentors
+  - Real-time assistance
+  - Progress tracking with mentors
+  - Customized learning paths
+
+- **Community Events** 📅
+
+  - Register for local and online events
+  - Filter events by category and location
+  - Track registered events
+  - Online/offline event options
+
+- **Progress Tracking** 📊
+  - Overall learning progress dashboard
+  - Course-specific progress tracking
+  - Achievement system
+  - Personal learning history
+
+## Technical Stack 🛠
+
+### Frontend
+
+- **Swift UI**
+  - Native iOS application
+  - Intuitive user interface
+  - Responsive design
+  - Accessibility features
+
+### Backend
+
+- **Express.js**
+  - RESTful API architecture
+  - Secure authentication
+  - Event management
+  - Progress tracking system
+
+### Database
+
+- **MongoDB**
+  - User profiles
+  - Course content
+  - Progress tracking
+  - Event management
+
+## Getting Started 🏁
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- MongoDB
+- Xcode (for iOS development)
+- iOS 14.0 or later
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/senior-connect.git
 ```
-nw_read_request_report [C3] Receive failed with error "Operation timed out"
 
-```
-- When scroll events [High Priority] => no need to init stuff for every events
-```
-🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a258fd
-🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a258fe
-🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a258ff
-🔄 EventDetailViewModel initialized for event: 673acf01fa25a7cae7a25900
-🔄 Updating AuthService in EventDetailViewModel
-🔄 Updating AuthService in EventDetailViewModel
-🔄 Updating AuthService in EventDetailViewModel
-🔄 Updating AuthService in EventDetailViewModel
+2. No need to install backend dependencies (unless u want to) -> backend is deployed on Vercel: https://senior-connect-app-backend.vercel.app/api/events
+
+3. Set up environment variables
+
+```bash
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
-## Plan 
+1. Open iOS project
 
-### 13 Nov 
-- [ ] Smartphone Basics Frontend
-- [ ] Smartphone Basics Backend
-- [ ] Make Backend more readable -> diff folders PLSSSS AYAZHHHH
-- [x] fetched lessons from the backend
-- [x] move lesson models to diff folder!
-- [x] add save progress button
-- [x] let user update the progress whenever they want!
+```bash
+cd ../ios
+open SeniorConnect.xcodeproj
+```
 
-### 14 Nov
+## Contributing 🤝
 
-- [x] Complete lessons w multiple sections
-- [x] fix get progress backed
-- [x] Get data properly from the backend on stepProgress and show it 
+We welcome contributions! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-### 15 nov
-- [x] Refresh Updates
-- [x] Dont show "u wanna see quick tutorial thing" every time 
+## Acknowledgments 🙏
 
-### 16-17 Nov
-- [ ] Try out CRUD Opers
-- [ ] fix date on the backend
-- [ ] reg/unreg
-- online/offline
-- based on areas/region
-- language
-- categories for each
-- REGISTERED?
+- Educational content creators from Youtube (I will add their usernames soon)
 
-### 18 nov
-- add toast when reg/unreg 
-- online/not check
-- [x] add video url
-- [x] Add lessons
-- [x] Add image to every event -> now it is just random
-- [x] Add Sample Events (10)
-- [x] check lessons
-- [x] filter by category
-- [x] tab that shows registered events
+## Development Logs 📝
 
+### November 13-15, 2023
 
-## 19 nov
-- [x] Make quick actions workable
-- [ ] put events code to diff folders for better readability
-- [ ] update after added help req 
-- [x] can see reqs
-- [x] Mentor help request
-- [x] Make help view look better
-- [x] Add delete mentorship request
+- ✅ Implemented core lesson functionality
+- ✅ Set up backend structure
+- ✅ Added progress tracking system
+- ✅ Implemented lesson fetching from backend
+- ✅ Fixed progress tracking bugs
+- ✅ Enhanced user experience with tutorial improvements
 
-## 20 nov
-- [x] Added DigitalLiteracy courses 
-- [x] add placeholder image for youtube vids
-- [x] remove second help request sheet
-- [x] overall Progress to home page
-- [x] remove unnecessary padding from help request
-- [ ] put events code to diff folders for better readability
-- [x] update after added help req 
-- [ ] Helper for category colors -> make more reusable bc in EventRow & in EventDetail
-- [ ] Add quizes to digitalLiteracy
-- [ ] When scroll events [High Priority] => no need to init stuff for every events
+### November 16-18, 2023
 
+- ✅ Implemented event management system
+- ✅ Added video URL support
+- ✅ Enhanced lesson content
+- ✅ Added sample events
+- ✅ Implemented category filtering
+- ✅ Added registered events tab
 
-## 21 nov
-- add Social media lessons
+### November 19-20, 2023
 
-## Backlog:
-- [ ] Your Learning Progress for every category ?
-- [ ] Make Detail View look good like in drafts
-- [ ] go thru the code, remove lengthy views!
-- [ ] Add image for vidoes, can we show them in the same page ?
-- [ ] Remove help requested and remove save for later (just change backebd) -> Easy 
+- ✅ Implemented mentorship system
+- ✅ Enhanced help request functionality
+- ✅ Added Digital Literacy courses
+- ✅ Improved home page with progress tracking
+- ✅ UI/UX improvements
+- ✅ Added YouTube video integration
+
+### December 1, 2023
+
+- ✅ Implemented IoT section
+- ✅ Fixed learning progress tracking
+- ✅ Backend deployment to Vercel
+- 🔄 API endpoint: https://senior-connect-app-backend.vercel.app/api/events
+
+### Known Issues & Future Improvements
+
+- ⏳ Event registration status display optimization
+- ⏳ Infinite scroll implementation
+- ⏳ Code organization improvements
+- ⏳ Quiz system for Digital Literacy section
+- ⏳ Event view model optimization
+- ⏳ Contact button implementation
+- 💡 Potential offline support
 
 ## Dec 1
 
@@ -129,10 +179,8 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 - [x] IOT section
 - [ ] deploy the backend, fix the baseurls
 - [ ] add placeholder picture
-- [x] Your learning progress fix 
-
+- [x] Your learning progress fix
 
 Ideas:
+
 1. Add offline support?
-
-
