@@ -126,10 +126,10 @@ nw_read_request_report [C3] Receive failed with error "Operation timed out"
 ## Dec 1
 
 - [ ] contact button
-- [ ] IOT section
+- [x] IOT section
 - [ ] deploy the backend, fix the baseurls
 - [ ] add placeholder picture
-- [ ] Your learning progress fix 
+- [x] Your learning progress fix 
 
 
 Ideas:

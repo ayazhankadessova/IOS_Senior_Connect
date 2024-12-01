@@ -33,7 +33,7 @@ struct HomeView: View {
                     UpcomingEventsPreview()
                     
                     // Tutorial Progress
-                    TutorialProgressCard(totalLessons: 10,completedLessons: completedLessons)
+                    TutorialProgressCard(totalLessons: 16,completedLessons: completedLessons)
                 }
                 .padding()
             }

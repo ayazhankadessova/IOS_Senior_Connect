@@ -5,7 +5,7 @@ struct AuthUser: Codable {
     let name: String
     let email: String
     let progress: UserProgress
-    let overallProgress: OverallProgress
+    var overallProgress: OverallProgress
     let registeredEvents: [String]  // Add registeredEvents array
     let v: Int
     
@@ -59,7 +59,7 @@ struct SignupResponse: Codable {
     let name: String
     let email: String
     let progress: UserProgress
-    let overallProgress: OverallProgress
+    var overallProgress: OverallProgress
     let registeredEvents: [String]  // Add registeredEvents array
     let id: String
     let v: Int
@@ -96,7 +96,7 @@ struct SignupCredentials: Codable {
 
 struct AuthResponse: Codable {
     let progress: UserProgress
-    let overallProgress: OverallProgress
+    var overallProgress: OverallProgress
     let id: String
     let name: String
     let email: String

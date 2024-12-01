@@ -59,12 +59,12 @@ struct SimpleResponse: Codable {
 
 struct CategoryProgressResponse: Codable {
     let categoryProgress: [CategoryLessonProgress]
-    let overallProgress: OverallProgress
+    var overallProgress: OverallProgress
 }
 
 struct ProgressResponse: Codable {
     let progress: CategoryLessonProgress
-    let overallProgress: OverallProgress
+    var overallProgress: OverallProgress
 }
 
 struct LessonProgress: Codable, Identifiable {
@@ -94,7 +94,7 @@ struct LessonProgress: Codable, Identifiable {
 }
 
 struct OverallProgress: Codable {
-    let totalLessonsCompleted: Int
+    var totalLessonsCompleted: Int
     let averageQuizScore: Double
     let lastActivityDate: Date  // This will now be properly decoded
 }

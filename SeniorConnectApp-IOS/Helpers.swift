@@ -91,20 +91,38 @@ struct TutorialPromptView: View {
 // MARK: - Tutorial Progress Card
 struct TutorialProgressCard: View {
     let totalLessons: Int
-    let completedLessons: Int // Added to track completed lessons
-    let totalTopics: Int = 10 // Total number of topics
-    let completedTopics: Int = 3 // Completed topics
+    let completedLessons: Int
+//    let totalTopics: Int = 16
+    @EnvironmentObject var authService: AuthService
+    @State private var isRefreshing = false
+    @State private var updatedCompletedLessons: Int?
     
-    // Calculate progress as a Float between 0 and 1
     private var progress: Float {
         guard totalLessons > 0 else { return 0 }
-        return Float(completedLessons) / Float(totalLessons)
+        return Float(updatedCompletedLessons ?? completedLessons) / Float(totalLessons)
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Your Learning Progress")
-                .font(.system(size: 20, weight: .bold))
+            HStack {
+                Text("Your Learning Progress")
+                    .font(.system(size: 20, weight: .bold))
+                
+                Spacer()
+                
+                Button(action: {
+                    refresh()
+                }) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 20))
+                        .foregroundColor(.blue)
+                        .rotationEffect(.degrees(isRefreshing ? 360 : 0))
+                        .animation(
+                            isRefreshing ? Animation.linear(duration: 1).repeatForever(autoreverses: false) : .default,
+                            value: isRefreshing
+                        )
+                }
+            }
             
             ProgressView(value: progress)
                 .tint(.blue)
@@ -114,7 +132,7 @@ struct TutorialProgressCard: View {
                 Text("\(Int(progress * 100))% Complete")
                     .foregroundColor(.secondary)
                 Spacer()
-                Text("\(completedTopics)/\(totalTopics) Topics")
+                Text("\(completedLessons)/\(totalLessons) Lessons")
                     .foregroundColor(.secondary)
             }
             .font(.system(size: 16))
@@ -123,6 +141,37 @@ struct TutorialProgressCard: View {
         .background(Color(.systemBackground))
         .cornerRadius(15)
         .shadow(radius: 2)
+    }
+    
+    private func refresh() {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        
+        Task {
+            do {
+                let lessonService = LessonService()
+                let total = try await lessonService.fetchTotalLessonsCompleted(
+                    userId: authService.currentUser?.id ?? ""
+                )
+                
+                await MainActor.run {
+                    updatedCompletedLessons = total
+                    isRefreshing = false
+                    
+                    // Update auth service if needed
+                    if let user = authService.currentUser {
+                        var updatedUser = user
+                        updatedUser.overallProgress.totalLessonsCompleted = total
+                        authService.currentUser = updatedUser
+                    }
+                }
+            } catch {
+                print("Error refreshing total progress: \(error)")
+                await MainActor.run {
+                    isRefreshing = false
+                }
+            }
+        }
     }
 }
 
@@ -145,7 +194,7 @@ struct QuickActionButton: View {
 }
 
 struct OverallProgressView: View {
-    let progress: OverallProgress
+    var progress: OverallProgress
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

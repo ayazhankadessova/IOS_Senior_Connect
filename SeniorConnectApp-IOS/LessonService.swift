@@ -78,6 +78,27 @@ class LessonService: ObservableObject {
         return try JSONDecoder.authDecoder.decode([Lesson].self, from: data)
     }
     
+    func fetchTotalLessonsCompleted(userId: String) async throws -> Int {
+            let urlString = "\(baseURL)/api/users/\(userId)/progress/total-completed"
+            guard let url = URL(string: urlString) else {
+                throw NetworkError.invalidURL
+            }
+            
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw NetworkError.invalidResponse
+            }
+            
+            struct TotalProgressResponse: Codable {
+                var totalLessonsCompleted: Int
+            }
+            
+            let result = try JSONDecoder().decode(TotalProgressResponse.self, from: data)
+            return result.totalLessonsCompleted
+        }
+    
     private func fetchUserProgress(userId: String, category: String) async throws -> CategoryProgressResponse {
             let urlString = "\(baseURL)/api/users/\(userId)/progress/\(category)"
             guard let url = URL(string: urlString) else {
