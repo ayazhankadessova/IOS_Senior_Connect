@@ -2,6 +2,9 @@
 
 A comprehensive digital learning platform designed specifically for seniors, helping them navigate the modern digital world with confidence. The platform offers structured courses, mentorship opportunities, and community events to make technology accessible and engaging for elderly users.
 
+![senior-connect](https://github.com/user-attachments/assets/bc9dcdb8-2dbf-4a19-91c5-059210732e37)
+
+
 ## Backend
 
 - Feel free to check out routes and use the backend, there is a rate limiter, so don't flood with requests
