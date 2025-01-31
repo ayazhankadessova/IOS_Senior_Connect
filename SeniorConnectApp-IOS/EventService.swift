@@ -9,7 +9,7 @@ import Foundation
 
 
 class EventService {
-    private let baseURL = "http://localhost:3000/api"
+    private let baseURL = "https://senior-connect-app-backend.vercel.app/api"
     
     private var cache: [String: Any] = [:] // Simple cache
     private let cacheTimeout: TimeInterval = 300 // 5 minutes

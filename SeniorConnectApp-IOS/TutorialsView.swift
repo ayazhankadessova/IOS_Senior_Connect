@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import SwiftData
 import WebKit
-
+import UIKit 
 
 struct TutorialsView: View {
     let tutorials = TutorialCategory.allCategories

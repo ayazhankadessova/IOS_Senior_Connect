@@ -57,7 +57,7 @@ extension MentorshipRequest {
 }
 
 class MentorshipService {
-    private let baseURL = "http://localhost:3000/api/mentorship"
+    private let baseURL = "https://senior-connect-app-backend.vercel.app/api/mentorship"
     
     func createMentorshipRequest(
             topic: String,

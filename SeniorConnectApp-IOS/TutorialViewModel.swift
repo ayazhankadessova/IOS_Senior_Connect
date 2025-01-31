@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 class TutorialViewModel: ObservableObject, MentorRequestFormDelegate {
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = "https://senior-connect-app-backend.vercel.app"
     
     @Published var selectedLesson: Lesson?
     @Published var currentStep: Int = 0

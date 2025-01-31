@@ -7,7 +7,7 @@ class LessonService: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var error: Error?
     
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = "https://senior-connect-app-backend.vercel.app"
     
     private func convertDisplayNameToApiName(_ displayName: String) -> String {
         switch displayName {

@@ -29,7 +29,7 @@ class AuthService: ObservableObject {
     @Published var isAuthenticated = false
     @Published var authError: AuthError?
     
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = "https://senior-connect-app-backend.vercel.app"
     private let decoder = JSONDecoder()
     
     func login(email: String, password: String) async throws {
